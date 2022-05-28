@@ -20,9 +20,16 @@ namespace DogsCompanion.App.Models.Account
         [Required]
         [Phone]
         public string PhoneNumber { get; set; } = null!;
+
+        [StringLength(30)]
         public string? FirstName { get; set; }
+
+        [StringLength(30)]
         public string? LastName { get; set; }
+
+        [StringLength(30)]
         public string? MiddleName { get; set; }
+
         public DateTime? BirthDate { get; set; }
     }
 }

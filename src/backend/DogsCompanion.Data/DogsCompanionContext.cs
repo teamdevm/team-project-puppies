@@ -54,6 +54,11 @@ namespace DogsCompanion.Data
             modelBuilder.Entity<GroomerSalon>(entity =>
             {
                 entity.HasData(DogsCompanionContextSeed.PredefinedVetGroomerSalons);
+                entity
+                .Property(b => b.OpeningHours)
+                .HasConversion(
+                    openingHours => JsonConvert.SerializeObject(openingHours),
+                    dbValue => JsonConvert.DeserializeObject<List<OpeningHours>>(string.IsNullOrEmpty(dbValue) ? "[]" : dbValue));
             });
 
             base.OnModelCreating(modelBuilder);

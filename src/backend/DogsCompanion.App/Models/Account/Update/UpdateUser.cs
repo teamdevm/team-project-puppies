@@ -8,9 +8,15 @@ namespace DogsCompanion.App.Models.Account.Update
 {
     public class UpdateUser
     {
+        [StringLength(30)]
         public string? FirstName { get; set; }
+
+        [StringLength(30)]
         public string? LastName { get; set; }
+
+        [StringLength(30)]
         public string? MiddleName { get; set; }
+
         public DateTime? BirthDate { get; set; }
     }
 }
