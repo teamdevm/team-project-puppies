@@ -20,6 +20,6 @@ namespace DogsCompanion.Data.Entities
         public string? Link { get; set; }
 
         [NotMapped]
-        public List<OpeningHours>? OpeningHours { get; set; }
+        public List<OpeningHours> OpeningHours { get; set; } = new List<OpeningHours>();
     }
 }

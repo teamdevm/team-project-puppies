@@ -18,7 +18,7 @@ namespace DogsCompanion.Data
 
         public DogsCompanionContext(DbContextOptions<DogsCompanionContext> options) : base(options)
         {
-            Database.EnsureDeleted();
+            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
@@ -34,7 +34,6 @@ namespace DogsCompanion.Data
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasData(DogsCompanionContextSeed.PredefinedUsers);
-                entity.HasIndex(p => new { p.Email, p.PhoneNumber }).IsUnique();
             });
 
             modelBuilder.Entity<Dog>(entity =>

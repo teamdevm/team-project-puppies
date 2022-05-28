@@ -1,25 +1,28 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DogsCompanion.App.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace DogsCompanion.Data.Entities
+namespace DogsCompanion.App.Models.Account
 {
-    [Index(nameof(Email), IsUnique = true)]
-    [Index(nameof(PhoneNumber), IsUnique = true)]
-    public class User
+    public class RegisterInfo
     {
-        public int Id { get; set; }
+        [Required]
+        [EmailAddress]
         public string Email { get; set; } = null!;
+
+        [Required]
+        [RegularExpression(RegexConstants.PasswordPattern, ErrorMessage = "Password must meet requirements")]
         public string Password { get; set; } = null!;
+
+        [Required]
+        [Phone]
         public string PhoneNumber { get; set; } = null!;
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? MiddleName { get; set; }
         public DateTime? BirthDate { get; set; }
-
-        public List<Dog> Dogs { get; set; } = null!;
     }
 }
