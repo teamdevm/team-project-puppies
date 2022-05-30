@@ -31,6 +31,11 @@ namespace DogsCompanion.App.Controllers.Personal
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<List<ReadDog>>> GetDogs(int userId)
         {
+            if (!UserExists(userId))
+            {
+                return NotFound("User not found");
+            }
+
             var dogs = await _context.Dogs.Where(u => u.UserId == userId).Select(d => new ReadDog
             {
                 Id = d.Id,
@@ -52,8 +57,12 @@ namespace DogsCompanion.App.Controllers.Personal
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ReadDog>> GetDogs(int userId, int dogId)
         {
-            var dog = await _context.Dogs.FindAsync(dogId);
+            if (!UserExists(userId))
+            {
+                return NotFound();
+            }
 
+            var dog = await _context.Dogs.FindAsync(dogId);
             if (dog == null)
             {
                 return NotFound();
@@ -77,9 +86,14 @@ namespace DogsCompanion.App.Controllers.Personal
         /// </summary>
         [HttpPut("{dogId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PutDog(int dogId, UpdateDog updateDog)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> PutDog(int userId, int dogId, UpdateDog updateDog)
         {
+            if (!UserExists(userId))
+            {
+                return BadRequest("User not found");
+            }
+
             var dog = await _context.Dogs.FindAsync(dogId);
             if (dog == null)
             {
@@ -108,8 +122,14 @@ namespace DogsCompanion.App.Controllers.Personal
         /// </summary>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ReadDog>> PostDog(int userId, UpdateDog newDog)
         {
+            if (!UserExists(userId))
+            {
+                return BadRequest("User not found");
+            }
+
             var dog = new Dog
             {
                 Name = newDog.Name,
@@ -146,9 +166,14 @@ namespace DogsCompanion.App.Controllers.Personal
         /// </summary>
         [HttpDelete("{dogId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteDog(int dogId)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteDog(int userId, int dogId)
         {
+            if (!UserExists(userId))
+            {
+                return BadRequest("User not found");
+            }
+
             var dog = await _context.Dogs.FindAsync(dogId);
             if (dog == null)
             {
@@ -166,6 +191,16 @@ namespace DogsCompanion.App.Controllers.Personal
             }
 
             return NoContent();
+        }
+
+        private bool UserExists(int id)
+        {
+            return _context.Users.Any(e => e.Id == id);
+        }
+
+        private bool DogExists(int id)
+        {
+            return _context.Dogs.Any(e => e.Id == id);
         }
     }
 }
