@@ -24,10 +24,10 @@ namespace DogsCompanion.App.Controllers
             _context = context;
         }
 
-        [HttpPost("registration")]
+        [HttpPost("register-user")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<UserInfo>> PostUser(RegisterInfo registerInfo)
+        public async Task<ActionResult<UserInfo>> RegisterUser(RegisterInfo registerInfo)
         {
             var user = await _context.Users
                 .Where(u => u.Email == registerInfo.Email || u.PhoneNumber == registerInfo.PhoneNumber)

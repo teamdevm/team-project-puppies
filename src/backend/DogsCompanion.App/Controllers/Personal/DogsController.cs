@@ -59,13 +59,13 @@ namespace DogsCompanion.App.Controllers.Personal
         {
             if (!UserExists(userId))
             {
-                return NotFound();
+                return NotFound("User not found");
             }
 
             var dog = await _context.Dogs.FindAsync(dogId);
             if (dog == null)
             {
-                return NotFound();
+                return NotFound("Dog not found");
             }
 
             var readDog = new ReadDog
@@ -86,18 +86,18 @@ namespace DogsCompanion.App.Controllers.Personal
         /// </summary>
         [HttpPut("{dogId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> PutDog(int userId, int dogId, UpdateDog updateDog)
         {
             if (!UserExists(userId))
             {
-                return BadRequest("User not found");
+                return NotFound("User not found");
             }
 
             var dog = await _context.Dogs.FindAsync(dogId);
             if (dog == null)
             {
-                return NotFound();
+                return NotFound("Dog not found");
             }
 
             dog.Name = updateDog.Name;
@@ -122,12 +122,12 @@ namespace DogsCompanion.App.Controllers.Personal
         /// </summary>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ReadDog>> PostDog(int userId, UpdateDog newDog)
         {
             if (!UserExists(userId))
             {
-                return BadRequest("User not found");
+                return NotFound("User not found");
             }
 
             var dog = new Dog
@@ -166,18 +166,18 @@ namespace DogsCompanion.App.Controllers.Personal
         /// </summary>
         [HttpDelete("{dogId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteDog(int userId, int dogId)
         {
             if (!UserExists(userId))
             {
-                return BadRequest("User not found");
+                return NotFound("User not found");
             }
 
             var dog = await _context.Dogs.FindAsync(dogId);
             if (dog == null)
             {
-                return NotFound();
+                return NotFound("Dog not found");
             }
 
             try
