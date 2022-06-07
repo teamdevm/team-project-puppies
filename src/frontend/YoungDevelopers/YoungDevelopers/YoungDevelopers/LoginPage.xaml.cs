@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using Xamarin.Forms;
@@ -12,11 +13,14 @@ namespace YoungDevelopers
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class LoginPage : ContentPage
     {
-        StackLayout layout, lay_registraion;
-        Image im_pug;
-        Label lb_dogass, lb_register;
-        ControlEntry en_login, en_password;
-        Button bt_login, bt_register, bt_recover;
+        private StackLayout layout, lay_registraion;
+        private Image im_pug;
+        private Label lb_dogass, lb_register;
+        private ControlEntry en_login, en_password;
+        private Button bt_login, bt_register, bt_recover;
+        private Frame fr_login, fr_pass;
+        private Regex re_email = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
+        private Regex re_pass = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,15}$");
         public LoginPage()
         {
             layout = new StackLayout();
@@ -37,7 +41,7 @@ namespace YoungDevelopers
             lb_dogass = new Label
             {
                 HorizontalTextAlignment = TextAlignment.Center,
-                Text = "Dog Assistant",
+                Text = "Dog's Companion",
                 TextColor = Color.Black,
                 FontSize = Device.GetNamedSize(NamedSize.Title, typeof(Label)),
                 Margin = new Thickness(50, 5, 50, 50),
@@ -58,7 +62,10 @@ namespace YoungDevelopers
                 VerticalTextAlignment = TextAlignment.Center
             };
 
-            Frame fr_login = new Frame
+            en_login.TextChanged += OnLoginTextChanged;
+            en_login.Unfocused += OnLoginUnfocused;
+
+            fr_login = new Frame
             {
                 CornerRadius = 10,
                 IsClippedToBounds = true,
@@ -72,14 +79,14 @@ namespace YoungDevelopers
             // Поле Пароль с границами
             en_password = new ControlEntry
             {
-                Placeholder = "Password",
+                Placeholder = "Пароль",
                 IsPassword = true,
                 FontFamily = "Cascadia Code Light",
                 BackgroundColor = Color.White,
                 Margin = new Thickness(0, -15, 0, -17.5),
             };
 
-            Frame fr_pass = new Frame
+            fr_pass = new Frame
             {
                 Content = en_password,
                 CornerRadius = 10,
@@ -87,6 +94,9 @@ namespace YoungDevelopers
                 IsClippedToBounds = true,
                 Margin = new Thickness(10, 0, 10, 0),
             };
+
+            en_password.TextChanged += OnPassTextChanged;
+            en_password.Unfocused += OnPassUnfocused;
 
             layout.Children.Add(fr_pass);
 
@@ -98,7 +108,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.Turquoise,
+                BackgroundColor = Color.SpringGreen,
                 CornerRadius = 10,
                 WidthRequest = 370
             };
@@ -141,7 +151,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 Text = "Зарегистрироваться",
                 FontAttributes = FontAttributes.Bold,
-                BackgroundColor = Color.Turquoise,
+                BackgroundColor = Color.SpringGreen,
                 CornerRadius = 10,
             };
             bt_register.Clicked += OnRegisterButtonClicked;
@@ -160,8 +170,18 @@ namespace YoungDevelopers
         }
 
         // --------------- Обработка событий --------------- //
-        private void OnLoginButtonClicked(object sender, EventArgs e)
+        private async void OnLoginButtonClicked(object sender, EventArgs e)
         {
+            if (fr_login.BorderColor == Color.White && fr_pass.BorderColor == Color.White)
+            {
+                await Navigation.PushModalAsync(new RegistrationPage());
+            }
+            else
+            {
+                // Ну, косяк
+                return;
+            }
+            // CheckField();
             // Обращение к Васе
         }
 
@@ -174,6 +194,50 @@ namespace YoungDevelopers
         private async void OnForgetButtonClicked(object sender, EventArgs e)
         {
             await Navigation.PushModalAsync(new ForgetPassPage());
+        }
+
+        private void OnLoginTextChanged(object sender, EventArgs e)
+        {
+            fr_login.BorderColor = Color.White;
+        }
+
+        private void OnLoginUnfocused(object sender, EventArgs e)
+        {
+            if (en_login.Text == "") return;
+            else
+            {
+                Match match = re_email.Match(en_login.Text);
+                if (!match.Success)
+                {
+                    fr_login.BorderColor = Color.FromRgb(194, 85, 85);
+                }
+                else
+                {
+                    fr_login.BorderColor = Color.White;
+                }
+            }
+        }
+
+        private void OnPassTextChanged(object sender, EventArgs e)
+        {
+            fr_pass.BorderColor = Color.White;
+        }
+
+        private void OnPassUnfocused(object sender, EventArgs e)
+        {
+            if (en_password.Text == "") return;
+            else
+            {
+                Match match = re_pass.Match(en_password.Text);
+                if (!match.Success)
+                {
+                    fr_pass.BorderColor = Color.FromRgb(194, 85, 85);
+                }
+                else
+                {
+                    fr_pass.BorderColor = Color.White;
+                }
+            }
         }
     }
 }

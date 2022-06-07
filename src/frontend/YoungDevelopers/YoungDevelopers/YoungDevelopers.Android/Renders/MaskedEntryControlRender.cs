@@ -7,12 +7,12 @@ using Xamarin.Forms.Platform.Android;
 using Android.OS;
 using Android.Graphics;
 
-[assembly: ExportRenderer(typeof(ControlEntry), typeof(ControlEntryRender))]
+[assembly: ExportRenderer(typeof(MaskedEntry), typeof(MaskedEntryRender))]
 namespace YoungDevelopers.Droid
 {
-    class ControlEntryRender : EntryRenderer
+    class MaskedEntryRender : EntryRenderer
     {
-        public ControlEntryRender(Context context) : base(context)
+        public MaskedEntryRender(Context context) : base(context)
         { }
 
         protected override void OnElementChanged(ElementChangedEventArgs<Entry> e)
@@ -21,7 +21,7 @@ namespace YoungDevelopers.Droid
 
             if (Control == null || e.NewElement == null) return;
 
-            if (e.NewElement is ControlEntry NewControlEntry)
+            if (e.NewElement is MaskedEntry NewControlEntry)
             {
                 // Tint Color
                 if (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
@@ -41,6 +41,5 @@ namespace YoungDevelopers.Droid
             }
 
         }
-
     }
 }

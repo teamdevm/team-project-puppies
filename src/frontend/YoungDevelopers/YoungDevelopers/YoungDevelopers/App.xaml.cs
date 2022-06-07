@@ -14,7 +14,7 @@ namespace YoungDevelopers
             InitializeComponent();
 
             DependencyService.Register<MockDataStore>();
-            MainPage = new LoginPage();
+            MainPage = new RegistrationPage();
         }
 
         protected override void OnStart()
