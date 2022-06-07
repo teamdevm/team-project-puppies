@@ -14,6 +14,7 @@ namespace DogsCompanion.App.Models.Read
         public string? PhoneNumber { get; set; }
         public string? Link { get; set; }
         public double Rating { get; set; }
+        public bool IsAllDay { get; set; } = false;
         public List<OpeningHours> OpeningHours { get; set; } = null!;
     }
 }

@@ -37,6 +37,7 @@ namespace DogsCompanion.App.Controllers.Content
                 PhoneNumber = c.PhoneNumber,
                 Link = c.Link,
                 Rating = c.Rating,
+                IsAllDay = c.IsAllDay,
                 OpeningHours = c.OpeningHours
             }).ToListAsync();
 

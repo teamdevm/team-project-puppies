@@ -20,6 +20,7 @@ namespace DogsCompanion.Data.Entities
         public string? PhoneNumber { get; set; }
         public string? Link { get; set; }
         public double Rating { get; set; } = 0.0;
+        public bool IsAllDay { get; set; } = false;
 
         [NotMapped]
         public List<OpeningHours> OpeningHours { get; set; } = new List<OpeningHours>();
