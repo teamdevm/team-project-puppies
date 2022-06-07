@@ -26,7 +26,7 @@ namespace DogsCompanion.Data
 
         public static List<VetClinic> PredefinedVetClinics => new List<VetClinic>
         {
-            new VetClinic { Id = 1, Name = "Друг", Address = "Ulitsa Geroyev Khasana, 7а", Link = "https://vetdrugperm.ru/", PhoneNumber = "8 (342) 244-11-51",
+            new VetClinic { Id = 1, Name = "Друг", Address = "Ulitsa Geroyev Khasana, 7а", Link = "https://vetdrugperm.ru/", PhoneNumber = "8 (342) 244-11-51", Rating = 3.9,
                 OpeningHours = new List<OpeningHours>
                 {
                     new OpeningHours
@@ -38,7 +38,7 @@ namespace DogsCompanion.Data
                 }
             },
 
-            new VetClinic { Id = 2, Name = "Клык+", Address = "Bul'var Gagarina, 70Б", Link = "https://bkperm.ru/", PhoneNumber = "8 (342) 270-02-18",
+            new VetClinic { Id = 2, Name = "Клык+", Address = "Bul'var Gagarina, 70Б", Link = "https://bkperm.ru/", PhoneNumber = "8 (342) 270-02-18", Rating = 4.1,
                 OpeningHours = new List<OpeningHours>
                 {
                     new OpeningHours
@@ -62,7 +62,7 @@ namespace DogsCompanion.Data
                 }
             },
 
-            new VetClinic { Id = 3, Name = "Emancipet", Address = "Ulitsa Ursha, 75", Link = "https://emancipet.org/", PhoneNumber = "8 (800) 555-35-35",
+            new VetClinic { Id = 3, Name = "Emancipet", Address = "Ulitsa Ursha, 75", Link = "https://emancipet.org/", PhoneNumber = "8 (800) 555-35-35", Rating = 2.7,
             },
         };
 
