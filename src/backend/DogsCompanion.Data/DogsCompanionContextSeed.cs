@@ -68,7 +68,7 @@ namespace DogsCompanion.Data
 
         public static List<GroomerSalon> PredefinedVetGroomerSalons => new List<GroomerSalon>
         {
-            new GroomerSalon { Id = 1, Address = "Пушкина 5а", Name = "Dog is Dog", Link = "https://dogisdog.ru/", PhoneNumber = "8 (342) 279-83-39"},
+            new GroomerSalon { Id = 1, Address = "Пушкина 5а", Name = "Dog is Dog", Link = "https://dogisdog.ru/", PhoneNumber = "8 (342) 279-83-39", Rating = 2.7},
         };
     }
 }

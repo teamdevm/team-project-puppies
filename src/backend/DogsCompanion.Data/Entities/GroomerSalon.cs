@@ -16,7 +16,8 @@ namespace DogsCompanion.Data.Entities
         public string? Address { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Link { get; set; }
-        
+        public double Rating { get; set; } = 0.0;
+
         [NotMapped]
         public List<OpeningHours> OpeningHours { get; set; } = new List<OpeningHours>();
     }
