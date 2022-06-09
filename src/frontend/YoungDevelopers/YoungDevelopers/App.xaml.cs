@@ -1,0 +1,32 @@
+﻿using System;
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
+using YoungDevelopers.Services;
+using YoungDevelopers.Views;
+
+namespace YoungDevelopers
+{
+    public partial class App : Application
+    {
+
+        public App()
+        {
+            InitializeComponent();
+
+            DependencyService.Register<MockDataStore>();
+            MainPage = new RegistrationPage();
+        }
+
+        protected override void OnStart()
+        {
+        }
+
+        protected override void OnSleep()
+        {
+        }
+
+        protected override void OnResume()
+        {
+        }
+    }
+}
