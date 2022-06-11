@@ -8,7 +8,7 @@ namespace DogsCompanion.Data.Entities
 {
     public class OpeningHours
     {
-        public Days Day { get; set; }
+        public Day Day { get; set; }
         public List<Period>? Periods { get; set; }
     }
 
@@ -18,7 +18,7 @@ namespace DogsCompanion.Data.Entities
         public DateTime Close { get; set; }
     }
 
-    public enum Days
+    public enum Day
     {
         Mon = 1,
         Tue,
