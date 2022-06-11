@@ -31,7 +31,7 @@ namespace DogsCompanion.Data
                 {
                     new OpeningHours
                     {
-                        Day = Days.Mon,
+                        Day = Day.Mon,
                         Periods = new List<Period>
                         { new Period {Open = new DateTime().AddHours(12), Close = new DateTime().AddHours(18) } }
                     }
@@ -43,19 +43,19 @@ namespace DogsCompanion.Data
                 {
                     new OpeningHours
                     {
-                        Day = Days.Mon,
+                        Day = Day.Mon,
                         Periods = new List<Period>
                         { new Period {Open = new DateTime().AddHours(12), Close = new DateTime().AddHours(18) } }
                     },
                     new OpeningHours
                     {
-                        Day = Days.Tue,
+                        Day = Day.Tue,
                         Periods = new List<Period>
                         { new Period {Open = new DateTime().AddHours(12), Close = new DateTime().AddHours(18) } }
                     },
                     new OpeningHours
                     {
-                        Day = Days.Wed,
+                        Day = Day.Wed,
                         Periods = new List<Period>
                         { new Period {Open = new DateTime().AddHours(12), Close = new DateTime().AddHours(18) } }
                     }
