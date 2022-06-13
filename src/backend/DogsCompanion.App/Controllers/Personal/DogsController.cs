@@ -1,4 +1,4 @@
-﻿using DogsCompanion.App.Models.Read;
+﻿using DogsCompanion.App.Models.Personal;
 using DogsCompanion.App.Models.Update;
 using DogsCompanion.Data;
 using DogsCompanion.Data.Entities;

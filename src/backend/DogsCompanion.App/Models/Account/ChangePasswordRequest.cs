@@ -5,12 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using DogsCompanion.App.Utils;
 
-namespace DogsCompanion.App.Models.Account.Update
+namespace DogsCompanion.App.Models.Account
 {
-    public class UpdatePassword
+    public class ChangePasswordRequest
     {
         [Required]
         [RegularExpression(RegexConstants.PasswordPattern, ErrorMessage = "Password must meet requirements")]
-        public string Password { get; set; } = null!;
+        public string NewPassword { get; set; } = null!;
+
+        [Required]
+        public string CurrentPassword { get; set; } = string.Empty;
     }
 }

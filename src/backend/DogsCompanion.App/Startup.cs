@@ -90,6 +90,8 @@ namespace DogsCompanion.App
             services.AddControllers();
 
             services.AddSingleton(new JwtManager(securitySettings));
+            services.AddHttpContextAccessor();
+            services.AddScoped<ClaimsValidationService>();
 
             services.AddSwaggerGen(c =>
             {
@@ -151,8 +153,9 @@ namespace DogsCompanion.App
                 });
             }
 
-            app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
