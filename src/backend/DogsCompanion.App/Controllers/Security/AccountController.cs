@@ -78,7 +78,7 @@ namespace DogsCompanion.App.Controllers
             }
             catch (DbUpdateException)
             {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             // Генерация токенов для нового пользователя
@@ -104,12 +104,12 @@ namespace DogsCompanion.App.Controllers
             catch (DbUpdateException updateExc)
             {
                 // TODO log: DbUpdateException
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
             catch (Exception exc)
             {
                 //TODO log: Token generation error
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             var userInfo = new UserInfo
@@ -181,7 +181,7 @@ namespace DogsCompanion.App.Controllers
             }
             catch (DbUpdateException)
             {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             return NoContent();
@@ -221,7 +221,7 @@ namespace DogsCompanion.App.Controllers
             }
             catch (DbUpdateException)
             {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             return NoContent();
@@ -267,7 +267,7 @@ namespace DogsCompanion.App.Controllers
             }
             catch (DbUpdateException)
             {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             return NoContent();

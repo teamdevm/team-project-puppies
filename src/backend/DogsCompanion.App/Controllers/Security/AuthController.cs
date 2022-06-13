@@ -57,7 +57,7 @@ namespace DogsCompanion.App.Controllers.Security
             catch (DbUpdateException updateExc)
             {
                 // TODO log: DbUpdateException
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
             catch (Exception exc)
             {
@@ -141,7 +141,7 @@ namespace DogsCompanion.App.Controllers.Security
             catch (DbUpdateException updateExc)
             {
                 // TODO log: DbUpdateException
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             return Ok(new RefreshTokenRequest

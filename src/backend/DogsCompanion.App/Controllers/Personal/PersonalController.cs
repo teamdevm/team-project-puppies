@@ -89,7 +89,7 @@ namespace DogsCompanion.App.Controllers.Personal
             }
             catch (DbUpdateException)
             {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             return NoContent();
