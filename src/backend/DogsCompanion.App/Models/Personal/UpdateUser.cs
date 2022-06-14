@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DogsCompanion.App.Models.Account.Update
+namespace DogsCompanion.App.Models.Personal
 {
     public class UpdateUser
     {

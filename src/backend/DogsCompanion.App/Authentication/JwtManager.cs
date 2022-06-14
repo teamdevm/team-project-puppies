@@ -28,7 +28,7 @@ namespace DogsCompanion.App.Authentication
             _jwtTokenHandler = new JwtSecurityTokenHandler();
         }
 
-        public Tokens GenerateJwtToken(string userId)
+        public Tokens GenerateTokens(string userId)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
@@ -44,7 +44,7 @@ namespace DogsCompanion.App.Authentication
                     new Claim(JwtRegisteredClaimNames.Aud, _settings.JwtAudience),
                     new Claim(JwtRegisteredClaimNames.Iss, _settings.JwtIssuer)
                 }),
-                Expires = DateTime.UtcNow.AddDays(_settings.JwtExpireDays), // TODO from config _settings.
+                Expires = DateTime.UtcNow.AddDays(_settings.JwtExpireDays),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };
 

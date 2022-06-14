@@ -1,4 +1,4 @@
-﻿using DogsCompanion.App.Models.Read;
+﻿using DogsCompanion.App.Models.Personal;
 using DogsCompanion.App.Models.Update;
 using DogsCompanion.Data;
 using DogsCompanion.Data.Entities;
@@ -111,7 +111,7 @@ namespace DogsCompanion.App.Controllers.Personal
             }
             catch (DbUpdateException)
             {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             return NoContent();
@@ -146,7 +146,7 @@ namespace DogsCompanion.App.Controllers.Personal
             }
             catch (DbUpdateException)
             {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             var readDog = new ReadDog
@@ -187,7 +187,7 @@ namespace DogsCompanion.App.Controllers.Personal
             }
             catch (DbUpdateException)
             {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             return NoContent();
