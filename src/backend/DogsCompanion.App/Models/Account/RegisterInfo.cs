@@ -1,4 +1,5 @@
-﻿using DogsCompanion.App.Utils;
+﻿using DogsCompanion.App.Models.Update;
+using DogsCompanion.App.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -31,5 +32,8 @@ namespace DogsCompanion.App.Models.Account
         public string? MiddleName { get; set; }
 
         public DateTime? BirthDate { get; set; }
+
+        [Required]
+        public UpdateDog Dog { get; set; } = null!;
     }
 }

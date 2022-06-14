@@ -15,6 +15,7 @@ namespace DogsCompanion.Data
         public DbSet<Dog> Dogs => Set<Dog>();
         public DbSet<VetClinic> VetClinincs => Set<VetClinic>();
         public DbSet<GroomerSalon> GroomerSalons => Set<GroomerSalon>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         public DogsCompanionContext(DbContextOptions<DogsCompanionContext> options) : base(options)
         {

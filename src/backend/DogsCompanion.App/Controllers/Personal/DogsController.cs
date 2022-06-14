@@ -1,7 +1,9 @@
-﻿using DogsCompanion.App.Models.Read;
+﻿using DogsCompanion.App.Authentication;
+using DogsCompanion.App.Models.Personal;
 using DogsCompanion.App.Models.Update;
 using DogsCompanion.Data;
 using DogsCompanion.Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,57 +14,36 @@ using System.Threading.Tasks;
 
 namespace DogsCompanion.App.Controllers.Personal
 {
-    [Route("api/users/{userId}/dogs")]
+    [Authorize]
     [ApiController]
+    [Route("api/account/dog")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public class DogsController : ControllerBase
     {
         private readonly DogsCompanionContext _context;
+        private readonly int? _userId;
 
-        public DogsController(DogsCompanionContext context)
+        public DogsController(DogsCompanionContext context, ClaimsValidationService claimsValidationService)
         {
             _context = context;
-        }
-
-        /// <summary>
-        /// Получение списка собак пользователя
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<List<ReadDog>>> GetDogs(int userId)
-        {
-            if (!UserExists(userId))
-            {
-                return NotFound("User not found");
-            }
-
-            var dogs = await _context.Dogs.Where(u => u.UserId == userId).Select(d => new ReadDog
-            {
-                Id = d.Id,
-                Name = d.Name,
-                BirthDate = d.BirthDate,
-                Breed = d.Breed,
-                Weight = d.Weight,
-                UserId = d.UserId,
-            }).ToListAsync();
-
-            return Ok(dogs);
+            _userId = claimsValidationService.GetUserId();
         }
 
         /// <summary>
         /// Получение информации об одной собаке
         /// </summary>
-        [HttpGet("{dogId}")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ReadDog>> GetDogs(int userId, int dogId)
+        public async Task<ActionResult<ReadDog>> GetDogs()
         {
-            if (!UserExists(userId))
+            if (_userId == null)
             {
-                return NotFound("User not found");
+                return Unauthorized("No JTI claim");
             }
+            int userId = _userId!.Value;
 
-            var dog = await _context.Dogs.FindAsync(dogId);
+            var dog = await _context.Dogs.Where(d => d.UserId == userId).OrderBy(d => d.Id).FirstOrDefaultAsync();
             if (dog == null)
             {
                 return NotFound("Dog not found");
@@ -84,17 +65,18 @@ namespace DogsCompanion.App.Controllers.Personal
         /// <summary>
         /// Обновление данных о собаке
         /// </summary>
-        [HttpPut("{dogId}")]
+        [HttpPut]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PutDog(int userId, int dogId, UpdateDog updateDog)
+        public async Task<IActionResult> PutDog(UpdateDog updateDog)
         {
-            if (!UserExists(userId))
+            if (_userId == null)
             {
-                return NotFound("User not found");
+                return Unauthorized("No JTI claim");
             }
+            int userId = _userId!.Value;
 
-            var dog = await _context.Dogs.FindAsync(dogId);
+            var dog = await _context.Dogs.Where(d => d.UserId == userId).OrderBy(d => d.Id).FirstOrDefaultAsync();
             if (dog == null)
             {
                 return NotFound("Dog not found");
@@ -111,83 +93,7 @@ namespace DogsCompanion.App.Controllers.Personal
             }
             catch (DbUpdateException)
             {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            }
-
-            return NoContent();
-        }
-
-        /// <summary>
-        /// Добавление собаки
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ReadDog>> PostDog(int userId, UpdateDog newDog)
-        {
-            if (!UserExists(userId))
-            {
-                return NotFound("User not found");
-            }
-
-            var dog = new Dog
-            {
-                Name = newDog.Name,
-                BirthDate = newDog.BirthDate,
-                Breed = newDog.Breed,
-                Weight = newDog.Weight,
-                UserId = userId
-            };
-
-            try
-            {
-                _context.Dogs.Add(dog);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-            }
-
-            var readDog = new ReadDog
-            {
-                Id = dog.Id,
-                Name = dog.Name,
-                BirthDate = dog.BirthDate,
-                Breed = dog.Breed,
-                Weight = dog.Weight
-            };
-
-            return Created("", readDog);
-        }
-
-        /// <summary>
-        /// Удаление собаки
-        /// </summary>
-        [HttpDelete("{dogId}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteDog(int userId, int dogId)
-        {
-            if (!UserExists(userId))
-            {
-                return NotFound("User not found");
-            }
-
-            var dog = await _context.Dogs.FindAsync(dogId);
-            if (dog == null)
-            {
-                return NotFound("Dog not found");
-            }
-
-            try
-            {
-                _context.Dogs.Remove(dog);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
 
             return NoContent();
