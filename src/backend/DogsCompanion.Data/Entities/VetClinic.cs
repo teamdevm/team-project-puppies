@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace DogsCompanion.Data.Entities
 {
-    [Index(nameof(PhoneNumber), IsUnique = true)]
     public class VetClinic
     {
         public int Id { get; set; }
