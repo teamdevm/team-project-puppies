@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace DogsCompanion.Data.Entities
 {
-    [Index(nameof(PhoneNumber), IsUnique = true)]
     public class GroomerSalon
     {
         public int Id { get; set; }
