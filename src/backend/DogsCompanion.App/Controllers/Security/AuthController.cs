@@ -125,12 +125,15 @@ namespace DogsCompanion.App.Controllers.Security
             var jti = parsedToken.Claims.SingleOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti);
             if (jti == null || storedRefreshToken.JwtId != jti.Value)
             {
-                return BadRequest("The token doens't match the saved token");
+                return BadRequest("No JTI claim");
             }
 
-            int userId = int.Parse(User.FindFirst(c => c.Type == SecurityConstants.ClaimNames.UserId)!.Value);
+            if (!int.TryParse(parsedToken.Claims.FirstOrDefault(x => x.Type == SecurityConstants.ClaimNames.UserId).Value, out int userId))
+            {
+                return BadRequest("No JTI claim");
+            }
+
             var tokens = _jwtManager.GenerateTokens(userId.ToString());
-            
             try
             {
                 storedRefreshToken.IsUsed = true;

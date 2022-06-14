@@ -35,7 +35,7 @@ namespace DogsCompanion.App.Controllers.Personal
         {
             if (_userId == null)
             {
-                Unauthorized("No JTI claim");
+                return Unauthorized("No JTI claim");
             }
             int userId = _userId!.Value;
 
@@ -68,7 +68,7 @@ namespace DogsCompanion.App.Controllers.Personal
         {
             if (_userId == null)
             {
-                Unauthorized("No JTI claim");
+                return Unauthorized("No JTI claim");
             }
             int userId = _userId!.Value;
 
