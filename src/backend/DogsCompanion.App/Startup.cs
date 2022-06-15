@@ -38,27 +38,15 @@ namespace DogsCompanion.App
 
             var tokenValidationParameters = new TokenValidationParameters
             {
-                // Указывает, будет ли валидироваться издатель при валидации токена
                 ValidateIssuer = true,
-
-                // Будет ли валидироваться потребитель токена
                 ValidateAudience = false,
-
-                // Будет ли валидироваться время существования
                 ValidateLifetime = true,
-
-                // Строка, представляющая издателя
                 ValidIssuer = securitySettings.JwtIssuer,
-
-                // Установка потребителя токена
                 ValidAudience = securitySettings.JwtAudience,
-
-                // Валидация ключа безопасности
                 ValidateIssuerSigningKey = true,
-
-                // Установка ключа безопасности
+                
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securitySettings.JwtSecret)),
-                ClockSkew = TimeSpan.Zero // Удалить задержку после истечения времени токена
+                ClockSkew = TimeSpan.Zero // РЈРґР°Р»РёС‚СЊ Р·Р°РґРµСЂР¶РєСѓ РїРѕСЃР»Рµ РёСЃС‚РµС‡РµРЅРёСЏ РІСЂРµРјРµРЅРё С‚РѕРєРµРЅР°
             };
 
             services.AddAuthorization();
@@ -99,7 +87,7 @@ namespace DogsCompanion.App
                 {
                     Title = "Dog's Companion API",
                     Version = "v1",
-                    Description = "ASP.NET Core Web API для приложения Dog's Companion"
+                    Description = "ASP.NET Core Web API РґР»СЏ РїСЂРёР»РѕР¶РµРЅРёСЏ Dog's Companion"
                 });
 
                 c.CustomOperationIds(apiDescription =>
@@ -114,7 +102,7 @@ namespace DogsCompanion.App
                     Scheme = "bearer",
                     Description = "Please insert JWT with Bearer into field",
                     In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey // TODO SecuritySchemeType.Http
+                    Type = SecuritySchemeType.ApiKey
                 });
 
                 var securityScheme = new OpenApiSecurityScheme
