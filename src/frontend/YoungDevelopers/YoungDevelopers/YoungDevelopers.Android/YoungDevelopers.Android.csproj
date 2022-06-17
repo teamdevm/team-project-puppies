@@ -66,8 +66,10 @@
     <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Renders\ControlEntryRender.cs" />
+    <Compile Include="Renders\ControlEntryRenderer.cs" />
     <Compile Include="MainActivity.cs" />
+    <Compile Include="Renders\CustomButtonRenderer.cs" />
+    <Compile Include="Renders\CustomPickerRender.cs" />
     <Compile Include="Renders\DatePickerControlRenderer.cs" />
     <Compile Include="Renders\MaskedEntryControlRender.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
@@ -105,6 +107,15 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\pug_yawn.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\ben.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\mads.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\sexembodiment.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ProjectExtensions>

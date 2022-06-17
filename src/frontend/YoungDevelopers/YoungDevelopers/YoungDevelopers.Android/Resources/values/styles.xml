@@ -2,6 +2,7 @@
 <resources>
 
   <style name="MainTheme" parent="MainTheme.Base">
+	  <item name="android:colorActivatedHighlight">@android:color/transparent</item>
 	  <item name="android:textCursorDrawable">@null</item>
 	  <item name="colorControlActivated">#000000</item>
 	  <!--If you are using revision 22.1 please use just windowNoTitle. Without android:-->
