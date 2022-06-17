@@ -5,4 +5,5 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 	<color name="colorCursors">#FFFFFF</color>
+	<color name="GreenPrimary">#FF00FF7F</color>
 </resources>
