@@ -1,7 +1,11 @@
-﻿using System;
+﻿using DogsCompanion.Api.Client;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using YoungDevelopers.Client;
 
 namespace YoungDevelopers
 {
@@ -217,7 +221,7 @@ namespace YoungDevelopers
         }
 
         #region Обработка событий
-        private void OnLoginButtonClicked(object sender, EventArgs e)
+        private async void OnLoginButtonClicked(object sender, EventArgs e)
         {
             if (fr_login.BorderColor == Color.White)
             {
@@ -225,9 +229,48 @@ namespace YoungDevelopers
                 sendauth.email = en_login.Text;
                 sendauth.password = en_password.Text;
 
-                // Обращение к Васе
-                //lb_pair_error.IsVisible = true;
-                //lay_registraion.Padding = new Thickness(0, 180, 0, 10);
+                var tokenController = (TokenController)App.Current.Properties["tokenController"];
+                var dogsCompanionClient = (DogsCompanionClient)App.Current.Properties["dogsCompanionClient"];
+                var httpClient = (HttpClient)App.Current.Properties["httpClient"];
+
+                try
+                {
+                    var authInfo = new AuthInfo()
+                    {
+                        Email = en_login.Text,
+                        Password = en_password.Text,
+                    };
+
+                    var authResponse = await dogsCompanionClient.AuthenticateAsync(authInfo);
+
+                    // Установление ключа в httpclient
+                    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
+
+                    // Сохранение токенов в хранилище
+                    await tokenController.SetRefreshTokenAsync(authResponse.RefreshToken);
+                    await tokenController.SetAccessTokenAsync(authResponse.AccessToken);
+
+                    // Переход на главную страницу
+                    // TODO сохранить полученные данные из authInfo
+                    // TODO поменять Main страницу
+                    await Navigation.PushAsync(new MainPage());
+                }
+                catch (ApiException apiExc)
+                {
+                    if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
+                    {
+                        // TODO сервер не отвечает
+                    }
+                    else if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
+                    {
+                        // TODO неверный логин или пароль
+                    }
+                }
+                catch (Exception exc)
+                {
+                    int i = 0;
+                    // TODO что-то совсем пошло не так
+                }
             }
             else
             {
