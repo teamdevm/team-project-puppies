@@ -32,11 +32,21 @@ namespace YoungDevelopers
         #endregion
         public LoginPage()
         {
+            string Message = DataControl.LoadData();
+            if (Message != "")
+            {
+                ErrorAlert(Message);
+            }
+
             this.Title = "Авторизация";
             layout = new StackLayout();
             layout.Orientation = StackOrientation.Vertical;
             layout.VerticalOptions = LayoutOptions.FillAndExpand;
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
+
+            #region Получение данных
+
+            #endregion
 
             #region Элементы страницы
             // Мопс
@@ -229,9 +239,10 @@ namespace YoungDevelopers
                 sendauth.email = en_login.Text;
                 sendauth.password = en_password.Text;
 
-                var tokenController = (TokenController)App.Current.Properties["tokenController"];
-                var dogsCompanionClient = (DogsCompanionClient)App.Current.Properties["dogsCompanionClient"];
-                var httpClient = (HttpClient)App.Current.Properties["httpClient"];
+                var dogsCompanionClient = DataControl.dogsCompanionClient;
+                var httpClient = DataControl.httpClient;
+                var tokenController = DataControl.tokenController;
+
 
                 try
                 {
@@ -250,10 +261,13 @@ namespace YoungDevelopers
                     await tokenController.SetRefreshTokenAsync(authResponse.RefreshToken);
                     await tokenController.SetAccessTokenAsync(authResponse.AccessToken);
 
+                    // Установить текущего пользователя
+                    DataControl.SetCurrentUser(authResponse);
+
                     // Переход на главную страницу
                     // TODO сохранить полученные данные из authInfo
                     // TODO поменять Main страницу
-                    await Navigation.PushAsync(new MainPage());
+                    App.Current.MainPage = new MainPage();
                 }
                 catch (ApiException apiExc)
                 {
@@ -266,11 +280,13 @@ namespace YoungDevelopers
                         // TODO неверный логин или пароль
                     }
                 }
-                catch (Exception exc)
+                catch (Exception)
                 {
-                    int i = 0;
                     // TODO что-то совсем пошло не так
                 }
+                // Обращение к Васе
+                //lb_pair_error.IsVisible = true;
+                //lay_registraion.Padding = new Thickness(0, 180, 0, 10);
             }
             else
             {
@@ -346,5 +362,10 @@ namespace YoungDevelopers
         }
 
         #endregion
+
+        public async void ErrorAlert(string a)
+        {
+            await DisplayAlert("Error", a, "OK");
+        }
     }
 }

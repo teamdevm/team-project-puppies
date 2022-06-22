@@ -14,7 +14,7 @@ namespace YoungDevelopers
             FlyoutPage.ListView.ItemSelected += ListView_ItemSelected;
         }
 
-        private async void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
             var item = e.SelectedItem as MainPageFlyoutMenuItem;
             if (item == null)

@@ -1,6 +1,9 @@
-﻿using System;
+﻿using DogsCompanion.Api.Client;
+using System;
+using System.Globalization;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using System.Net.Http;
 
 namespace YoungDevelopers
 {
@@ -12,6 +15,9 @@ namespace YoungDevelopers
         private Label lb_nickname_val, lb_breed, lb_breed_val, lb_weight, lb_weight_val, lb_birthdate, lb_birthdate_val;
         private CustomButton bt_edit;
         private Image im_doge;
+        private int UserID;
+        private ReadDog UserDog;
+        DogsCompanionClient dogsCompanionClient = (DogsCompanionClient)App.Current.Properties["dogsCompanionClient"];
 
         #endregion
 
@@ -22,6 +28,10 @@ namespace YoungDevelopers
             layout.Orientation = StackOrientation.Vertical;
             layout.VerticalOptions = LayoutOptions.FillAndExpand;
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
+
+            // Полученые данных
+            UserID = (int)App.Current.Properties["currentuserid"];
+            UserDog = DataControl.GetUserDogItem(UserID);
 
             #region Элементы страницы
 
@@ -38,7 +48,8 @@ namespace YoungDevelopers
             lb_nickname_val = new Label()
             {
                 HorizontalTextAlignment = TextAlignment.Center,
-                Text = "Стасян",
+                // Debug
+                Text = UserDog.Name,
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
                 FontSize = Device.GetNamedSize(NamedSize.Title, typeof(Label)),
@@ -52,7 +63,7 @@ namespace YoungDevelopers
             lb_breed = new Label()
             {
                 HorizontalOptions = LayoutOptions.Start,
-                Text = "Кличка собаки",
+                Text = "Порода собаки",
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
@@ -66,7 +77,7 @@ namespace YoungDevelopers
             lb_breed_val = new Label()
             {
                 HorizontalOptions = LayoutOptions.Start,
-                Text = "Стасян",
+                Text = UserDog.Breed,
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
@@ -93,7 +104,7 @@ namespace YoungDevelopers
             lb_weight_val = new Label()
             {
                 HorizontalOptions = LayoutOptions.Start,
-                Text = "15.0",
+                Text = UserDog.Weight.ToString(),
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
@@ -122,7 +133,8 @@ namespace YoungDevelopers
             {
                 IsVisible = true,
                 HorizontalOptions = LayoutOptions.Start,
-                Text = "09.06.2022",
+                //Text = String.Format("dd.MM.yyyy", UserDog.BirthDate),
+                Text = DateTime.Parse(UserDog.BirthDate.ToString()).ToString("dd.MM.yyyy"),
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Дата рождения собаки",
                 TextColor = Color.Black,
@@ -154,6 +166,9 @@ namespace YoungDevelopers
 
             this.Content = layout;
             InitializeComponent();
+
+            UpdateFieldsFromServer();
+
         }
 
         #region Обработка событий
@@ -165,5 +180,14 @@ namespace YoungDevelopers
         }
 
         #endregion
+
+        private async void UpdateFieldsFromServer()
+        {
+            ReadDog updateDoge = await dogsCompanionClient.GetDogsAsync();
+            lb_nickname_val.Text = updateDoge.Name;
+            lb_breed_val.Text = updateDoge.Breed;
+            lb_weight_val.Text = updateDoge.Weight.ToString();
+            lb_birthdate_val.Text = DateTime.Parse(updateDoge.BirthDate.ToString()).ToString("dd.MM.yyyy");
+        }
     }
 }
