@@ -1,4 +1,5 @@
 ﻿using DogsCompanion.Api.Client;
+using System.Linq;
 using System.Net.Http;
 using Xamarin.Forms;
 using YoungDevelopers.Client;
@@ -8,7 +9,33 @@ namespace YoungDevelopers
 {
     public partial class App : Application
     {
+
         public App()
+        {
+            CreateClient();
+            DataControl.LoadData();
+            InitializeComponent();
+            DependencyService.Register<MockDataStore>();
+
+            #region Инициализация свойства для хранения данных
+
+            // Загрузка данных данных
+            /* 1) При открытии приложения загрузить новые данные с сервера
+             * 2) Если загрузить не удалось - достаем из сериализованного файла в Properties
+             * 3) При переходе на страницы, которые отображают/запрашивают данные, обращаемся к серверу и обновляем Properties
+             * 4) По закрытии приложения сериализовать Properties данные снова в файл
+            */
+            #endregion
+            //((Data)App.Current.Properties["storedata"]).Dogs.Where(s => s.Id == 1).First().Name = "Ебырь";
+
+            MainPage = new NavigationPage(new LoginPage());
+            //MainPage = new MainPage();
+            //MainPage = new NavigationPage(new EditUserProfilePage());
+            //App.Current.Properties["currentuserid"] = 0;
+            //MainPage = new GroomingInfoPage(0);
+        }
+
+        private void CreateClient()
         {
             var httpClient = new HttpClient();
             App.Current.Properties["httpClient"] = httpClient;
@@ -23,13 +50,6 @@ namespace YoungDevelopers
             dogsCompanionClient.FailedServerUpdateToken += FailedServerUpdateToken;
 
             App.Current.Properties["dogsCompanionClient"] = dogsCompanionClient;
-
-            InitializeComponent();
-
-            DependencyService.Register<MockDataStore>();
-            //MainPage = new NavigationPage(new LoginPage());
-            MainPage = new MainPage();
-            //MainPage = new NavigationPage(new EditUserProfilePage());
         }
 
         private async void UpdateTokens(string refreshToken, string accessToken)
@@ -75,10 +95,12 @@ namespace YoungDevelopers
 
         protected override void OnStart()
         {
+
         }
 
         protected override void OnSleep()
         {
+            DataControl.SerializeToFile();
         }
 
         protected override void OnResume()

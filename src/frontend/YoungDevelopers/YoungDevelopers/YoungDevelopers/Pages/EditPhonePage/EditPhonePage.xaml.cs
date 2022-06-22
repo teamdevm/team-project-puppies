@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -10,9 +11,11 @@ namespace YoungDevelopers
         #region Инициализация 
         private StackLayout layout;
         private MaskedEntry me_phone;
-        private Frame fr_phone;
+        private Frame fr_phone, fr_password;
         private Button bt_save;
-        private Label lb_main_fields, lb_phone, lb_phone_er, lb_phone_exists;
+        private ControlEntry en_password;
+        private Label lb_main_fields, lb_phone, lb_phone_er, lb_phone_exists, lb_password, lb_password_er;
+        private Regex re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
         #endregion
         public EditPhonePage()
         {
@@ -79,6 +82,48 @@ namespace YoungDevelopers
             };
 
             layout.Children.Add(lb_phone_er);
+
+            // Пароль
+            lb_password = new Label()
+            {
+                HorizontalOptions = LayoutOptions.Start,
+                Text = "Пароль *",
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontFamily = "Cascadia Code Light",
+                TextColor = Color.Black,
+                FontAttributes = FontAttributes.Bold,
+                Margin = new Thickness(15, 0, 0, 5),
+            };
+            layout.Children.Add(lb_password);
+
+            en_password = new ControlEntry()
+            {
+                FontFamily = "Cascadia Code Light",
+                Margin = new Thickness(-10, -15, 0, -17.5),
+                Placeholder = "**********",
+                IsPassword = true,
+                MyTintColor = Color.Transparent,
+                MyHighlightColor = Color.Gray,
+                BackgroundColor = Color.White,
+                VerticalTextAlignment = TextAlignment.Center
+            };
+
+            en_password.TextChanged += OnPasswordTextChanged;
+            en_password.Unfocused += OnPasswordUnfocused;
+            en_password.Focused += OnPasswordFocused;
+
+            fr_password = new Frame
+            {
+                Content = en_password,
+                CornerRadius = 10,
+                HeightRequest = 6,
+                BorderColor = Color.White,
+                IsClippedToBounds = true,
+                Margin = new Thickness(10, 0, 10, 10),
+                HasShadow = true,
+            };
+
+            layout.Children.Add(fr_password);
 
             // Кнопка Сохранить изменения
             bt_save = new Button()
@@ -166,6 +211,47 @@ namespace YoungDevelopers
                     fr_phone.BackgroundColor = Color.White;
                     me_phone.BackgroundColor = Color.White;
                     me_phone.TextColor = Color.Black;
+                    CheckRecField();
+                }
+            }
+        }
+
+        public void OnPasswordTextChanged(object sender, EventArgs e)
+        {
+            lb_password_er.IsVisible = false;
+            fr_password.BorderColor = Color.White;
+            fr_password.BackgroundColor = Color.White;
+            en_password.BackgroundColor = Color.White;
+            en_password.TextColor = Color.Black;
+        }
+
+        public void OnPasswordFocused(object sender, EventArgs e)
+        {
+            fr_password.BorderColor = Color.SpringGreen;
+        }
+
+        public void OnPasswordUnfocused(object sender, EventArgs e)
+        {
+            fr_password.BorderColor = Color.White;
+            if (en_password.Text == "" || en_password.Text == null) return;
+            else
+            {
+                Match match = re_password.Match(en_password.Text);
+                if (!match.Success)
+                {
+                    lb_password_er.IsVisible = true;
+                    fr_password.BorderColor = Color.FromRgb(194, 85, 85);
+                    fr_password.BackgroundColor = Color.FromRgb(255, 187, 187);
+                    en_password.BackgroundColor = Color.FromRgb(255, 187, 187);
+                    en_password.TextColor = Color.FromRgb(194, 85, 85);
+                }
+                else
+                {
+                    lb_password_er.IsVisible = false;
+                    fr_password.BorderColor = Color.White;
+                    fr_password.BackgroundColor = Color.White;
+                    en_password.BackgroundColor = Color.White;
+                    en_password.TextColor = Color.Black;
                     CheckRecField();
                 }
             }

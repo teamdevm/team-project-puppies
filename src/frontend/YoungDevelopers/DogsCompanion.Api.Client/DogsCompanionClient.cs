@@ -12,6 +12,7 @@
 
 namespace DogsCompanion.Api.Client
 {
+    using System.Xml.Serialization;
     using System = global::System;
     
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "13.6.2.0 (NJsonSchema v10.1.23.0 (Newtonsoft.Json v11.0.0.0))")]
@@ -1315,7 +1316,8 @@ namespace DogsCompanion.Api.Client
     
     
     }
-    
+
+    [XmlRoot(ElementName = "Day", Namespace = "http://tempuri.org/")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.23.0 (Newtonsoft.Json v11.0.0.0)")]
     public enum Day
     {
@@ -1334,52 +1336,66 @@ namespace DogsCompanion.Api.Client
         _7 = 7,
     
     }
-    
+
+    [XmlRoot(ElementName = "ReadDog", Namespace = "http://tempuri.org/")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.23.0 (Newtonsoft.Json v11.0.0.0)")]
     public partial class GroomerSalon 
     {
+        [XmlElement(ElementName = "Id", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Id { get; set; }
-    
+
+        [XmlElement(ElementName = "Name", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
-    
+
+        [XmlElement(ElementName = "Address", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("address", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Address { get; set; }
-    
+
+        [XmlElement(ElementName = "PhoneNumber", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("phoneNumber", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string PhoneNumber { get; set; }
-    
+
+        [XmlElement(ElementName = "Link", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("link", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Link { get; set; }
-    
+
+        [XmlElement(ElementName = "Rating", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("rating", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public double Rating { get; set; }
-    
+
+        [XmlElement(ElementName = "OpeningHours", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("openingHours", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<OpeningHours> OpeningHours { get; set; }
     
     
     }
-    
+
+    [XmlRoot(ElementName = "OpeningHours", Namespace = "http://tempuri.org/")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.23.0 (Newtonsoft.Json v11.0.0.0)")]
     public partial class OpeningHours 
     {
+        [XmlElement(ElementName = "Day", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("day", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public Day Day { get; set; }
-    
+
+        [XmlElement(ElementName = "Periods", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("periods", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<Period> Periods { get; set; }
     
     
     }
-    
+
+    [XmlRoot(ElementName = "Period", Namespace = "http://tempuri.org/")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.23.0 (Newtonsoft.Json v11.0.0.0)")]
     public partial class Period 
     {
+        [XmlElement(ElementName = "Open", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("open", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Open { get; set; }
-    
+
+        [XmlElement(ElementName = "Close", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("close", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Close { get; set; }
     
@@ -1415,25 +1431,32 @@ namespace DogsCompanion.Api.Client
     
     
     }
-    
+
+    [XmlRoot(ElementName = "ReadDog", Namespace = "http://tempuri.org/")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.23.0 (Newtonsoft.Json v11.0.0.0)")]
     public partial class ReadDog 
     {
+        [XmlElement(ElementName = "Id", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Id { get; set; }
-    
+
+        [XmlElement(ElementName = "Name", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
-    
+
+        [XmlElement(ElementName = "BirthDate", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("birthDate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? BirthDate { get; set; }
-    
+
+        [XmlElement(ElementName = "Breed", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("breed", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Breed { get; set; }
-    
+
+        [XmlElement(ElementName = "Weight", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("weight", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Weight { get; set; }
-    
+
+        [XmlElement(ElementName = "UserId", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("userId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int UserId { get; set; }
     
@@ -1557,58 +1580,75 @@ namespace DogsCompanion.Api.Client
     
     
     }
-    
+
+    [XmlRoot(ElementName = "UserInfo", Namespace = "http://tempuri.org/")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.23.0 (Newtonsoft.Json v11.0.0.0)")]
     public partial class UserInfo 
     {
+        [XmlElement(ElementName = "Id", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Id { get; set; }
-    
+
+        [XmlElement(ElementName = "Email", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("email", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Email { get; set; }
-    
+
+        [XmlElement(ElementName = "PhoneNumber", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("phoneNumber", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string PhoneNumber { get; set; }
-    
+
+        [XmlElement(ElementName = "FirstName", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("firstName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string FirstName { get; set; }
-    
+
+        [XmlElement(ElementName = "LastName", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("lastName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string LastName { get; set; }
-    
+
+        [XmlElement(ElementName = "MiddleName", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("middleName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string MiddleName { get; set; }
-    
+
+        [XmlElement(ElementName = "BirthDate", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("birthDate", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? BirthDate { get; set; }
     
     
     }
-    
+
+    [XmlRoot(ElementName = "VetClinic", Namespace = "http://tempuri.org/")]
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "10.1.23.0 (Newtonsoft.Json v11.0.0.0)")]
     public partial class VetClinic 
     {
+        [XmlElement(ElementName = "Id", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Id { get; set; }
-    
+
+        [XmlElement(ElementName = "BirtNamehDate", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
-    
+
+        [XmlElement(ElementName = "Address", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("address", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Address { get; set; }
-    
+
+        [XmlElement(ElementName = "PhoneNumber", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("phoneNumber", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string PhoneNumber { get; set; }
-    
+
+        [XmlElement(ElementName = "Link", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("link", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Link { get; set; }
-    
+
+        [XmlElement(ElementName = "Rating", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("rating", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public double Rating { get; set; }
-    
+
+        [XmlElement(ElementName = "IsAllDay", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("isAllDay", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool IsAllDay { get; set; }
-    
+
+        [XmlElement(ElementName = "OpeningHours", Namespace = "http://tempuri.org/")]
         [Newtonsoft.Json.JsonProperty("openingHours", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<OpeningHours> OpeningHours { get; set; }
     
