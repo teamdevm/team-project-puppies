@@ -123,9 +123,17 @@ namespace DogsCompanion.App
                 c.IncludeXmlComments(xmlPath);
             });
 
-            string connectionString = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<DogsCompanionContext>(options => options.UseSqlServer(
-                connectionString));
+            string? connectionString = GetHerokuConnectionString();
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                connectionString = Configuration.GetConnectionString("DefaultConnection");
+                services.AddDbContext<DogsCompanionContext>(options => options.UseSqlServer(
+                    connectionString));
+            }
+            else
+            {
+                services.AddDbContext<DogsCompanionContext>(options => options.UseNpgsql(connectionString));
+            }
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -149,6 +157,21 @@ namespace DogsCompanion.App
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private string? GetHerokuConnectionString()
+        {
+            string? connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+            if (string.IsNullOrEmpty(connectionUrl))
+                return null;
+
+            var databaseUri = new Uri(connectionUrl);
+
+            string db = databaseUri.LocalPath.TrimStart('/');
+            string[] userInfo = databaseUri.UserInfo.Split(':', StringSplitOptions.RemoveEmptyEntries);
+
+            return $"User ID={userInfo[0]};Password={userInfo[1]};Host={databaseUri.Host};Port={databaseUri.Port};Database={db};Pooling=true;SSL Mode=Require;Trust Server Certificate=True;";
         }
     }
 }
