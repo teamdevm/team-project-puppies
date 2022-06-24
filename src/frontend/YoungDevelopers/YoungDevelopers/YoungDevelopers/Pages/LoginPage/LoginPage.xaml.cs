@@ -1,10 +1,11 @@
 ﻿using DogsCompanion.Api.Client;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Rox;
+using System.Net.Http;
 using YoungDevelopers.Client;
 
 namespace YoungDevelopers
@@ -22,12 +23,17 @@ namespace YoungDevelopers
         private StackLayout layout, lay_registraion;
         private Image im_pug;
         private Label lb_dogass, lb_register,
-            lb_login_error, lb_pair_error;
+            lb_login_error, lb_pair_error, lb_logging_er;
         private ControlEntry en_login, en_password;
         private Button bt_login, bt_register, bt_recover;
         private Frame fr_login, fr_pass;
+        private VideoView video;
+        private Action startVideo;
         private Regex re_email = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
         private SendAuth sendauth;
+        private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
+        private HttpClient httpClient = DataControl.httpClient;
+        private TokenController tokenController = DataControl.tokenController;
 
         #endregion
         public LoginPage()
@@ -50,14 +56,22 @@ namespace YoungDevelopers
 
             #region Элементы страницы
             // Мопс
-            im_pug = new Image 
-            { 
-                Source = "ben.jpg", 
+            im_pug = new Image
+            {
+                Source = "ben.jpg",
                 Margin = new Thickness(50, 50, 50, 0),
                 BackgroundColor = Color.FromRgb(242, 242, 242),
             };
 
             layout.Children.Add(im_pug);
+
+            //video = new VideoView
+            //{
+            //    Source = "ben.mp4",
+            //    ShowController = true,
+            //    Margin = new Thickness(50, 50, 50, 0),
+            //};
+            //layout.Children.Add(video);
 
             //Надпись Dog Assistant
             lb_dogass = new Label
@@ -91,6 +105,7 @@ namespace YoungDevelopers
 
             fr_login = new Frame
             {
+                Content = en_login,
                 CornerRadius = 10,
                 BackgroundColor = Color.White,
                 BorderColor = Color.White,
@@ -173,6 +188,19 @@ namespace YoungDevelopers
 
             layout.Children.Add(lb_pair_error);
 
+            // Ошибка авторизации
+            lb_logging_er = new Label()
+            {
+                IsVisible = false,
+                FontFamily = "Cascadia Code Light",
+                Text = "",
+                Margin = new Thickness(15, -3, 0, -1),
+                VerticalOptions = LayoutOptions.Start,
+                TextColor = Color.Red,
+            };
+
+            layout.Children.Add(lb_logging_er);
+
             // Кнопка забыл пароль
             bt_recover = new Button
             {
@@ -225,24 +253,29 @@ namespace YoungDevelopers
                       
 
             InitializeComponent();
-
-            // ??? что оно тут забыло?
-            fr_login.Content = en_login;
         }
 
         #region Обработка событий
         private async void OnLoginButtonClicked(object sender, EventArgs e)
         {
+            if (en_login.Text == null || en_password.Text == null)
+            {
+                return;
+            }
+            if (lb_login_error.IsVisible)
+            {
+                lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+            }
+            else
+            {
+                lay_registraion.Padding = new Thickness(0, 150, 0, 15);
+            }
+            lb_logging_er.IsVisible = false;
             if (fr_login.BorderColor == Color.White)
             {
                 sendauth = new SendAuth();
                 sendauth.email = en_login.Text;
                 sendauth.password = en_password.Text;
-
-                var dogsCompanionClient = DataControl.dogsCompanionClient;
-                var httpClient = DataControl.httpClient;
-                var tokenController = DataControl.tokenController;
-
 
                 try
                 {
@@ -273,39 +306,34 @@ namespace YoungDevelopers
                 {
                     if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
                     {
-                        // TODO сервер не отвечает
+                        lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+                        lb_logging_er.Text = "Сервис недоступен";
+                        lb_logging_er.IsVisible = true;
                     }
                     else if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
                     {
-                        // TODO неверный логин или пароль
+                        lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+                        lb_logging_er.Text = "Неверный логин или пароль";
+                        lb_logging_er.IsVisible = true;
                     }
                 }
                 catch (Exception)
                 {
-                    // TODO что-то совсем пошло не так
+                    lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+                    lb_logging_er.Text = "Произошла непредвиденная ошибка";
+                    lb_logging_er.IsVisible = true;
                 }
-                // Обращение к Васе
-                //lb_pair_error.IsVisible = true;
-                //lay_registraion.Padding = new Thickness(0, 180, 0, 10);
-            }
-            else
-            {
-                // Ну, косяк
-                lay_registraion.Padding = new Thickness(0, 200, 0, 10);
-                return;
-            }
-            
+            }            
         }
 
         private async void OnRegisterButtonClicked(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new RegistrationPage());
-            //await Navigation.PopToRootAsync();
         }
 
         private async void OnForgetButtonClicked(object sender, EventArgs e)
         {
-            await Navigation.PushModalAsync(new ForgetPassPage());
+            await Navigation.PushAsync(new ForgetPassPage());
         }
 
         private void OnLoginTextChanged(object sender, EventArgs e)
@@ -315,7 +343,7 @@ namespace YoungDevelopers
             fr_login.BackgroundColor = Color.White;
             en_login.BackgroundColor = Color.White;
             en_login.TextColor = Color.Black;
-            lay_registraion.Padding = new Thickness(0, 200, 0, 10);
+            lay_registraion.Padding = new Thickness(0, 150, 0, 15);
         }
 
         private void OnLoginUnfocused(object sender, EventArgs e)
@@ -332,7 +360,7 @@ namespace YoungDevelopers
                     fr_login.BackgroundColor = Color.FromRgb(255, 187, 187);
                     en_login.BackgroundColor = Color.FromRgb(255, 187, 187);
                     en_login.TextColor = Color.FromRgb(194, 85, 85);
-                    lay_registraion.Padding = new Thickness(0, 180, 0, 10);
+                    lay_registraion.Padding = new Thickness(0, 130, 0, 20);
                 }
                 else
                 {
@@ -341,18 +369,28 @@ namespace YoungDevelopers
                     fr_login.BackgroundColor = Color.White;
                     en_login.BackgroundColor = Color.White;
                     en_login.TextColor = Color.Black;
-                    lay_registraion.Padding = new Thickness(0, 200, 0, 10);
+                    lay_registraion.Padding = new Thickness(0, 150, 0, 15);
                     
                 }
             }
         }
         private void OnLoginFocused(object sender, EventArgs e)
-        {
+        { 
+            lb_logging_er.IsVisible = false;
             fr_login.BorderColor = Color.SpringGreen;
         }
 
         private void OnPasswordFocused(object sender, EventArgs e)
         {
+            if (lb_login_error.IsVisible)
+            {
+                lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+            }
+            else
+            {
+                lay_registraion.Padding = new Thickness(0, 150, 0, 15);
+            }
+            lb_logging_er.IsVisible = false;
             fr_pass.BorderColor = Color.SpringGreen;
         }
 

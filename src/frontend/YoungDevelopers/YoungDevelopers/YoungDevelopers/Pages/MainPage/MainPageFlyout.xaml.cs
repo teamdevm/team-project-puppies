@@ -32,7 +32,6 @@ namespace YoungDevelopers
                     new MainPageFlyoutMenuItem { Id = 0, Title = "Профиль собаки", TargetType = typeof(MainPageDetail) },
                     new MainPageFlyoutMenuItem { Id = 1, Title = "Профиль пользователя", TargetType = typeof(UserProfilePage) },
                     new MainPageFlyoutMenuItem { Id = 2, Title = "Записаться на процедуры", TargetType = typeof(ProcRegPage) },
-                    new MainPageFlyoutMenuItem { Id = 3, Title = "Напоминания", TargetType = typeof(ForgetPassPage) },
                 });
             }
 

@@ -1,9 +1,7 @@
 ﻿using DogsCompanion.Api.Client;
 using System;
-using System.Globalization;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using System.Net.Http;
 
 namespace YoungDevelopers
 {
@@ -133,8 +131,7 @@ namespace YoungDevelopers
             {
                 IsVisible = true,
                 HorizontalOptions = LayoutOptions.Start,
-                //Text = String.Format("dd.MM.yyyy", UserDog.BirthDate),
-                Text = DateTime.Parse(UserDog.BirthDate.ToString()).ToString("dd.MM.yyyy"),
+                Text = UserDog.BirthDate == null ? "" : DateTime.Parse(UserDog.BirthDate.ToString()).ToString("dd.MM.yyyy"),
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Дата рождения собаки",
                 TextColor = Color.Black,
@@ -187,7 +184,12 @@ namespace YoungDevelopers
             lb_nickname_val.Text = updateDoge.Name;
             lb_breed_val.Text = updateDoge.Breed;
             lb_weight_val.Text = updateDoge.Weight.ToString();
-            lb_birthdate_val.Text = DateTime.Parse(updateDoge.BirthDate.ToString()).ToString("dd.MM.yyyy");
+            lb_birthdate_val.Text = updateDoge.BirthDate == null ? "" : DateTime.Parse(updateDoge.BirthDate.ToString()).ToString("dd.MM.yyyy");
+        }
+
+        protected override void OnAppearing()
+        {
+            UpdateFieldsFromServer();
         }
     }
 }

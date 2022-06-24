@@ -9,6 +9,7 @@ using YoungDevelopers.Client;
 using System.Net.Http;
 using System.Xml;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace YoungDevelopers
 {
@@ -21,13 +22,11 @@ namespace YoungDevelopers
 
         public static string fileName = "data.json";
         public static string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        //public static string path = "C:/Users/Pists/source/repos/YoungDevelopers/YoungDevelopers/kek/data.xml";
-
-
 
         public static string LoadData()
         {
             return DeserializeFromFile();
+            //LoadTestData();
         }
         public static void ClearAllData()
         {
@@ -41,8 +40,8 @@ namespace YoungDevelopers
             Data data = new Data();
             data.Dogs.Add
             (
-            
-                new ReadDog { Id = 1, Name = "", Breed = "", Weight = 0, BirthDate = new DateTime(2000, 1, 1) , UserId = 1}
+
+                new ReadDog { Id = 1, Name = "", Breed = "", Weight = 0, BirthDate = new DateTime(2000, 1, 1), UserId = 1 }
             );
             data.Users.Add
             (
@@ -51,7 +50,7 @@ namespace YoungDevelopers
             App.Current.Properties["storedata"] = data;
         }
 
-        
+
         public static void LoadFromServer()
         {
 
@@ -108,6 +107,13 @@ namespace YoungDevelopers
         {
             App.Current.Properties["currentuserid"] = authResponse.Id;
         }
+        public static void SetNewCurrentUser(RegisterResponse regResponse)
+        {
+            App.Current.Properties["currentuserid"] = regResponse.UserInfo.Id;
+            ((Data)App.Current.Properties["storedata"]).Users.Add(regResponse.UserInfo);
+            ((Data)App.Current.Properties["storedata"]).Dogs.Add(regResponse.DogInfo);
+        }
+        
 
         public static void LoadTestData()
         {
@@ -251,7 +257,13 @@ namespace YoungDevelopers
             return ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == UserID);
         }
 
-        public static List <UserInfo> GetUserListItem(int UserID)
+        public static UserInfo GetCurrentUserItem()
+        {
+            int CurrentUserId = (int)App.Current.Properties["currentuserid"];
+            return ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == CurrentUserId);
+        }
+
+        public static List<UserInfo> GetUserListItem(int UserID)
         {
             return ((Data)App.Current.Properties["storedata"]).Users;
         }
@@ -266,7 +278,7 @@ namespace YoungDevelopers
             return ((Data)App.Current.Properties["storedata"]).VetClinics.First(s => s.Id == VetID);
         }
 
-        public static List <VetClinic> GetVetClinicListItem()
+        public static List<VetClinic> GetVetClinicListItem()
         {
             return ((Data)App.Current.Properties["storedata"]).VetClinics;
         }
@@ -298,10 +310,95 @@ namespace YoungDevelopers
             }
         }
 
+        public static void SetVetclinicItem(VetClinic vetClinic)
+        {
+            if (((Data)App.Current.Properties["storedata"]).VetClinics.First(s => s.Id == vetClinic.Id) == null)
+            {
+                ((Data)App.Current.Properties["storedata"]).VetClinics.Add(vetClinic);
+            }
+            else
+            {
+                ((Data)App.Current.Properties["storedata"]).VetClinics.First(s => s.Id == vetClinic.Id).Address = vetClinic.Address;
+                ((Data)App.Current.Properties["storedata"]).VetClinics.First(s => s.Id == vetClinic.Id).Rating = vetClinic.Rating;
+                ((Data)App.Current.Properties["storedata"]).VetClinics.First(s => s.Id == vetClinic.Id).Link = vetClinic.Link;
+                ((Data)App.Current.Properties["storedata"]).VetClinics.First(s => s.Id == vetClinic.Id).Name = vetClinic.Name;
+                ((Data)App.Current.Properties["storedata"]).VetClinics.First(s => s.Id == vetClinic.Id).PhoneNumber = vetClinic.PhoneNumber;
+                ((Data)App.Current.Properties["storedata"]).VetClinics.First(s => s.Id == vetClinic.Id).OpeningHours = vetClinic.OpeningHours;
+                ((Data)App.Current.Properties["storedata"]).VetClinics.First(s => s.Id == vetClinic.Id).IsAllDay = vetClinic.IsAllDay;
+            }
+        }
+
+        public static void SetUserInfoItem(UserInfo updateUser)
+        {
+            ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).Email = updateUser.Email;
+            ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).PhoneNumber = updateUser.PhoneNumber;
+            ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).FirstName = updateUser.FirstName;
+            ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).LastName = updateUser.LastName;
+            ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).MiddleName = updateUser.MiddleName;
+            ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).BirthDate = updateUser.BirthDate;      
+        }
+
         public static UserInfo UpdateUser()
         {
             //int UserID = (int)App.Current.Properties["currentuserid"];
             return null;
+        }
+
+        public async static void LoadTestUser()
+        {
+            string email = "spistsov@gmail.com";
+            string password = "Billy1!";
+            SendAuth sendauth = new SendAuth();
+            sendauth.email = email;
+            sendauth.password = password;
+
+            var dogsCompanionClient = DataControl.dogsCompanionClient;
+            var httpClient = DataControl.httpClient;
+            var tokenController = DataControl.tokenController;
+
+
+            try
+            {
+                var authInfo = new AuthInfo()
+                {
+                    Email = email,
+                    Password = password,
+                };
+
+                var authResponse = await dogsCompanionClient.AuthenticateAsync(authInfo);
+
+                // Установление ключа в httpclient
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
+
+                // Сохранение токенов в хранилище
+                await tokenController.SetRefreshTokenAsync(authResponse.RefreshToken);
+                await tokenController.SetAccessTokenAsync(authResponse.AccessToken);
+
+                // Установить текущего пользователя
+                DataControl.SetCurrentUser(authResponse);
+
+                // Переход на главную страницу
+                // TODO сохранить полученные данные из authInfo
+                // TODO поменять Main страницу
+            }
+            catch (ApiException apiExc)
+            {
+                if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
+                {
+                }
+                else if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
+                {
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        public static string GetHoursString(bool AllDay, string weekDay, ICollection<Period> dayPeriod)
+        {
+            if (AllDay) return weekDay + ": КРУГЛОСУТОЧНО";
+            return weekDay + ": " + (dayPeriod.Count == 0 ? "ВЫХОДНОЙ" : dayPeriod.First().Open.UtcDateTime.Hour.ToString() + ":00" + '-' + dayPeriod.Last().Open.UtcDateTime.Hour.ToString() + ":00");
         }
 
         public static string GetEmoji(bool value)
@@ -318,7 +415,7 @@ namespace YoungDevelopers
         public enum Item
         {
             User,
-            Dog, 
+            Dog,
             VetClinic,
             Grooming,
             UserEmail,
