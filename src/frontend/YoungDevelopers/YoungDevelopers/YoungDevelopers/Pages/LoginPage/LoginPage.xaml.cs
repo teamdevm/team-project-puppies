@@ -293,9 +293,10 @@ namespace YoungDevelopers
                     // Сохранение токенов в хранилище
                     await tokenController.SetRefreshTokenAsync(authResponse.RefreshToken);
                     await tokenController.SetAccessTokenAsync(authResponse.AccessToken);
+                    ReadDog addDog = await dogsCompanionClient.GetDogsAsync();
 
-                    // Установить текущего пользователя
-                    DataControl.SetCurrentUser(authResponse);
+                    // Загрузить информацию о пользователе
+                    DataControl.SetAuthData(authResponse, addDog);
 
                     // Переход на главную страницу
                     // TODO сохранить полученные данные из authInfo

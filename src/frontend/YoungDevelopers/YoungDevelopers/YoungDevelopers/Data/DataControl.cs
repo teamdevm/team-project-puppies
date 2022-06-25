@@ -1,59 +1,32 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text;
-using System.Xml.Serialization;
 using System.IO;
 using DogsCompanion.Api.Client;
 using YoungDevelopers.Client;
 using System.Net.Http;
-using System.Xml;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Http;
 
 namespace YoungDevelopers
 {
     public static class DataControl
     {
-        // Get Client
         public static TokenController tokenController = (TokenController)App.Current.Properties["tokenController"];
         public static DogsCompanionClient dogsCompanionClient = (DogsCompanionClient)App.Current.Properties["dogsCompanionClient"];
         public static HttpClient httpClient = (HttpClient)App.Current.Properties["httpClient"];
-
         public static string fileName = "data.json";
         public static string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
         public static string LoadData()
         {
-            return DeserializeFromFile();
-            //LoadTestData();
-        }
-        public static void ClearAllData()
-        {
-            App.Current.Properties["storedata"] = null;
-            App.Current.Properties["storedata"] = new Data();
-        }
-
-        public static void FillWithVoid()
-        {
-            App.Current.Properties["storedata"] = null;
-            Data data = new Data();
-            data.Dogs.Add
-            (
-
-                new ReadDog { Id = 1, Name = "", Breed = "", Weight = 0, BirthDate = new DateTime(2000, 1, 1), UserId = 1 }
-            );
-            data.Users.Add
-            (
-                new UserInfo { Id = 1, Email = "", PhoneNumber = "", FirstName = "", LastName = "", MiddleName = "", BirthDate = new DateTime(2000, 1, 1) }
-            );
-            App.Current.Properties["storedata"] = data;
-        }
-
-
-        public static void LoadFromServer()
-        {
-
+            string DeserializeMessage = DeserializeFromFile();
+            if (DeserializeMessage != "")
+            {
+                FillWithVoid();
+                SerializeToFile();
+                return DeserializeMessage;
+            }
+            return "";
         }
 
         public static string SerializeToFile()
@@ -89,31 +62,70 @@ namespace YoungDevelopers
                         JsonSerializer serializer = new JsonSerializer();
                         App.Current.Properties["storedata"] = (Data)serializer.Deserialize(file, typeof(Data));
                     }
+                    return "";
                 }
                 catch (Exception e)
                 {
                     return e.Message;
                 }
             }
-            return "";
+            return "Deserialization Fail";
         }
 
-        public static void UpdateProperties()
+        public static void FillWithVoid()
         {
-
+            App.Current.Properties["storedata"] = new Data();
+            ((Data)App.Current.Properties["storedata"]).Users = new List<UserInfo>();
+            ((Data)App.Current.Properties["storedata"]).Dogs = new List<ReadDog>();
+            ((Data)App.Current.Properties["storedata"]).VetClinics = new List<VetClinic>();
+            ((Data)App.Current.Properties["storedata"]).VetGroomerSalons = new List<GroomerSalon>();
         }
 
         public static void SetCurrentUser(AuthResponse authResponse)
         {
             App.Current.Properties["currentuserid"] = authResponse.Id;
         }
+
         public static void SetNewCurrentUser(RegisterResponse regResponse)
         {
             App.Current.Properties["currentuserid"] = regResponse.UserInfo.Id;
             ((Data)App.Current.Properties["storedata"]).Users.Add(regResponse.UserInfo);
             ((Data)App.Current.Properties["storedata"]).Dogs.Add(regResponse.DogInfo);
         }
-        
+
+        public static void SetAuthData(AuthResponse authResponse, ReadDog addDog)
+        {
+            try
+            {
+                int i = ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == authResponse.Id).Id;
+
+                SetCurrentUser(authResponse);
+            }
+            catch (Exception e)
+            {
+                UserInfo addUser = new UserInfo();
+                addUser.Id = authResponse.Id;
+                addUser.Email = authResponse.Email;
+                addUser.PhoneNumber = authResponse.PhoneNumber;
+                addUser.FirstName = authResponse.FirstName;
+                addUser.LastName = authResponse.LastName;
+                addUser.MiddleName = authResponse.MiddleName;
+                addUser.BirthDate = authResponse.BirthDate;
+
+                ((Data)App.Current.Properties["storedata"]).Users.Add(addUser);
+                SetCurrentUser(authResponse);
+            }
+
+            try
+            {
+                int j = ((Data)App.Current.Properties["storedata"]).Dogs.First(s => s.UserId == authResponse.Id).Id;
+            }
+            catch (Exception ex)
+            {
+                ((Data)App.Current.Properties["storedata"]).Dogs.Add(addDog);
+            }
+
+        }
 
         public static void LoadTestData()
         {
@@ -126,134 +138,8 @@ namespace YoungDevelopers
             App.Current.Properties["currentuserid"] = 1;
         }
 
-        // No ID need?
-        //public static string GetStringItem(DataControl.Item item)
-        //{
-        //    int UserID = (int)App.Current.Properties["currentuserid"];
-        //    if (item == DataControl.Item.DogName)
-        //    {
-        //        return ((Data)App.Current.Properties["storedata"]).Dogs.First(s => s.UserId == UserID).Name;
-        //    }
-        //    else if (item == DataControl.Item.DogBreed)
-        //    {
-        //        return ((Data)App.Current.Properties["storedata"]).Dogs.First(s => s.UserId == UserID).Breed;
-        //    }
-        //    else if (item == DataControl.Item.UserEmail)
-        //    {
-
-        //    }
-        //    // АААА
-        //    else if (item == DataControl.Item.UserPassword)
-        //    {
-
-        //    }
-        //    else if (item == DataControl.Item.UserPhoneNumber)
-        //    {
-
-        //    }
-        //    else if (item == DataControl.Item.UserFirstName)
-        //    {
-
-        //    }
-        //    else if (item == DataControl.Item.UserLastName)
-        //    {
-
-        //    }
-        //    else if (item == DataControl.Item.UserMiddleName)
-        //    {
-
-        //    }
-
-        //}
-
-        //public static string GetStringItemID(int ID, DataControl.Item item)
-        //{
-        //    if (item == DataControl.Item.GroomerSalonName)
-        //    {
-        //        return ((Data)App.Current.Properties["storedata"]).VetGroomerSalons.First(s => s.Id == ID).Name;
-        //    }
-        //    else if (item == DataControl.Item.GroomerSalonAddress)
-        //    {
-        //        return ((Data)App.Current.Properties["storedata"]).VetGroomerSalons.First(s => s.Id == ID).Address;
-        //    }
-        //    else if (item == DataControl.Item.GroomerSalonPhoneNumber)
-        //    {
-        //        return ((Data)App.Current.Properties["storedata"]).VetGroomerSalons.First(s => s.Id == ID).PhoneNumber;
-        //    }
-        //    else if (item == DataControl.Item.GroomerSalonLink)
-        //    {
-        //        return ((Data)App.Current.Properties["storedata"]).VetGroomerSalons.First(s => s.Id == ID).Link;
-        //    }
-        //    else if (item == DataControl.Item.VetClinicName)
-        //    {
-
-        //    }
-        //    else if (item == DataControl.Item.VetClinicAddress)
-        //    {
-
-        //    }
-        //    else if (item == DataControl.Item.VetClinicPhoneNumber)
-        //    {
-
-
-        //    }
-        //    else if (item == DataControl.Item.VetClinicLink)
-        //    {
-
-
-        //    }
-        //}
-
-
-        //public static bool GetBooleanItem(DataControl.Item item)
-        //{
-
-        //    VetClinicIsAllDay;
-        //}
-
-        //public static double GetDoubleItem(DataControl.Item item)
-        //{
-
-        //    GroomerSalonRating;
-        //    VetClinicRating;
-        //}
-
-        //public static int GetIntItem(DataControl.Item item)
-        //{
-        //    DogWeight;
-        //}
-
-        //public static DateTime GetDateItem(DataControl.Item item)
-        //{
-        //    return DateTime.Now;
-        //    UserBirthDate;
-        //    DogBirthDate;
-
-        //}
-
-        //public static User GetUserItem(DataControl.Item item)
-        //{
-        //    DogUser;
-        //    return null;
-        //}
-
-        //public static Dog GetDogItem(DataControl.Item item)
-        //{
-        //    UserDog;
-        //    return null;
-        //}
-
-        //public static OpeningHours GetOpeningHoursItem(DataControl.Item item)
-        //{
-        //    GroomerSalonOpeningHours;
-        //    VetClinicOpeningHours;
-        //    return null;
-        //}
-
-        // Получение данных из Data
         public static UserInfo GetUserItem(int UserID)
         {
-            //return ((Data)App.Current.Properties["storedata"]).Dogs.First(s => s.UserId == UserID).Name;
             return ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == UserID);
         }
 
@@ -335,64 +221,15 @@ namespace YoungDevelopers
             ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).FirstName = updateUser.FirstName;
             ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).LastName = updateUser.LastName;
             ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).MiddleName = updateUser.MiddleName;
-            ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).BirthDate = updateUser.BirthDate;      
+            ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).BirthDate = updateUser.BirthDate;
         }
 
-        public static UserInfo UpdateUser()
+        public static void SetReadDogItem(ReadDog updateDoge)
         {
-            //int UserID = (int)App.Current.Properties["currentuserid"];
-            return null;
-        }
-
-        public async static void LoadTestUser()
-        {
-            string email = "spistsov@gmail.com";
-            string password = "Billy1!";
-            SendAuth sendauth = new SendAuth();
-            sendauth.email = email;
-            sendauth.password = password;
-
-            var dogsCompanionClient = DataControl.dogsCompanionClient;
-            var httpClient = DataControl.httpClient;
-            var tokenController = DataControl.tokenController;
-
-
-            try
-            {
-                var authInfo = new AuthInfo()
-                {
-                    Email = email,
-                    Password = password,
-                };
-
-                var authResponse = await dogsCompanionClient.AuthenticateAsync(authInfo);
-
-                // Установление ключа в httpclient
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
-
-                // Сохранение токенов в хранилище
-                await tokenController.SetRefreshTokenAsync(authResponse.RefreshToken);
-                await tokenController.SetAccessTokenAsync(authResponse.AccessToken);
-
-                // Установить текущего пользователя
-                DataControl.SetCurrentUser(authResponse);
-
-                // Переход на главную страницу
-                // TODO сохранить полученные данные из authInfo
-                // TODO поменять Main страницу
-            }
-            catch (ApiException apiExc)
-            {
-                if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
-                {
-                }
-                else if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
-                {
-                }
-            }
-            catch (Exception)
-            {
-            }
+            ((Data)App.Current.Properties["storedata"]).Dogs.First(s => s.Id == updateDoge.Id).Name = updateDoge.Name;
+            ((Data)App.Current.Properties["storedata"]).Dogs.First(s => s.Id == updateDoge.Id).BirthDate = updateDoge.BirthDate;
+            ((Data)App.Current.Properties["storedata"]).Dogs.First(s => s.Id == updateDoge.Id).Breed = updateDoge.Breed;
+            ((Data)App.Current.Properties["storedata"]).Dogs.First(s => s.Id == updateDoge.Id).Weight = updateDoge.Weight;
         }
 
         public static string GetHoursString(bool AllDay, string weekDay, ICollection<Period> dayPeriod)
@@ -412,41 +249,5 @@ namespace YoungDevelopers
                 return new Emoji(0x274C).ToString();
             }
         }
-        public enum Item
-        {
-            User,
-            Dog,
-            VetClinic,
-            Grooming,
-            UserEmail,
-            UserPassword,
-            UserPhoneNumber,
-            UserFirstName,
-            UserLastName,
-            UserMiddleName,
-            UserBirthDate, //
-            UserDog,
-            DogName,
-            DogBirthDate, //
-            DogBreed,
-            DogWeight,
-            DogUserID,
-            DogUser, //
-            GroomerSalonName,
-            GroomerSalonAddress,
-            GroomerSalonPhoneNumber,
-            GroomerSalonLink,
-            GroomerSalonRating,
-            GroomerSalonOpeningHours, //
-            VetClinicName,
-            VetClinicAddress,
-            VetClinicPhoneNumber,
-            VetClinicLink,
-            VetClinicRating,
-            VetClinicIsAllDay,
-            VetClinicOpeningHours, //
-        };
-
-
     }
 }
