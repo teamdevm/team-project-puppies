@@ -12,13 +12,9 @@ namespace YoungDevelopers
     {
         private UserInfo user;
         public ListView ListView;
-        public static string AccountName = "";
-        private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
 
         public MainPageFlyout()
         {
-            user = DataControl.GetCurrentUserItem();
-            AccountName = user.FirstName;
             InitializeComponent();
 
             BindingContext = new MainPageFlyoutViewModel();
@@ -49,17 +45,6 @@ namespace YoungDevelopers
                 PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
             #endregion
-        }
-
-        private async void UpdateFieldsFromServer()
-        {
-            user = DataControl.GetCurrentUserItem();
-            AccountName = user.FirstName;
-        }
-
-        protected override void OnAppearing()
-        {
-            UpdateFieldsFromServer();
         }
     }
 }

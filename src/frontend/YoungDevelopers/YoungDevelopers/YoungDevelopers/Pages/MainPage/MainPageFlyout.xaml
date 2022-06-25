@@ -25,7 +25,8 @@
                     <Label
               Grid.Column="1"
               Grid.Row="2"
-              Text="{x:Static local:MainPageFlyout.AccountName}"
+              x:Name="AccountName_"
+              Text="Главная"
               TextColor="#ffffff"
               FontFamily="Cascadia Code Light"
               Style="{DynamicResource SubtitleStyle}"

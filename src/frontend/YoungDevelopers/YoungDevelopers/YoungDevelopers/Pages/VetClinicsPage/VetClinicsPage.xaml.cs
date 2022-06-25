@@ -16,7 +16,7 @@ namespace YoungDevelopers
         private ScrollView scrollview;
         private List<CustomButton> Buttons = new List<CustomButton>();
         private List<VetClinic> Clinics;
-        DogsCompanionClient dogsCompanionClient = (DogsCompanionClient)App.Current.Properties["dogsCompanionClient"];
+        private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
 
         #endregion
 

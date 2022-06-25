@@ -81,7 +81,7 @@ namespace YoungDevelopers
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Пароль должен содержать хотя бы одну цифру, латинскую букву в нижнем регистре, латинскую букву в верхнем регистре и спецсимвол",
+                Text = "Пароль должен содержать хотя бы одну цифру, латинскую букву в нижнем регистре, латинскую букву в верхнем регистре и спецсимвол [#?!@$%^&*-]",
                 Margin = new Thickness(15, -5, 10, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,

@@ -347,6 +347,7 @@ namespace YoungDevelopers
                     try
                     {
                         await dogsCompanionClient.PutDogAsync(updateDog);
+                        DataControl.SetReadDogItem(await dogsCompanionClient.GetDogsAsync());
                         await Navigation.PopAsync();
                     }
                     catch (ApiException apiExc)

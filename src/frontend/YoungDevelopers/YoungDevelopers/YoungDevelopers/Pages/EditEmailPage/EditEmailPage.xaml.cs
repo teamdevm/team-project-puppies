@@ -320,6 +320,7 @@ namespace YoungDevelopers
                         try
                         {
                             await dogsCompanionClient.ChangeEmailAsync(changeEmail);
+                            DataControl.SetUserInfoItem(await dogsCompanionClient.GetUserInfoAsync());
                             await Navigation.PopAsync();
                         }
                         catch (ApiException ex)

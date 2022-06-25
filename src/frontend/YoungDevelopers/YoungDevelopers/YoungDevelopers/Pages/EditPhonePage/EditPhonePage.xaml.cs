@@ -306,6 +306,7 @@ namespace YoungDevelopers
                         try
                         {
                             await dogsCompanionClient.ChangePhoneAsync(changePhone);
+                            DataControl.SetUserInfoItem(await dogsCompanionClient.GetUserInfoAsync());
                             await Navigation.PopAsync();
                         }
                         catch (ApiException ex)

@@ -304,6 +304,10 @@ namespace YoungDevelopers
                 }
                 catch (ApiException apiExc)
                 {
+                    bt_login.IsVisible = true;
+                    bt_register.IsVisible = true;
+                    activityIndicator.IsVisible = false;
+                    activityIndicator.IsRunning = false;
                     if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
                     {
                         bt_register.Margin = new Thickness(0, 180, 0, 20);
@@ -319,6 +323,10 @@ namespace YoungDevelopers
                 }
                 catch (Exception)
                 {
+                    bt_login.IsVisible = true;
+                    bt_register.IsVisible = true;
+                    activityIndicator.IsVisible = false;
+                    activityIndicator.IsRunning = false;
                     bt_register.Margin = new Thickness(0, 180, 0, 20);
                     lb_logging_er.Text = "Произошла непредвиденная ошибка";
                     lb_logging_er.IsVisible = true;
