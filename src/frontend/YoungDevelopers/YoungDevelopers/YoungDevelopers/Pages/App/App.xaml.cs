@@ -26,13 +26,13 @@ namespace YoungDevelopers
              * 4) По закрытии приложения сериализовать Properties данные снова в файл
             */
             #endregion
-            //((Data)App.Current.Properties["storedata"]).Dogs.Where(s => s.Id == 1).First().Name = "Ебырь";
 
             MainPage = new NavigationPage(new LoginPage());
             //MainPage = new MainPage();
-            //MainPage = new NavigationPage(new EditUserProfilePage());
+            //MainPage = new NavigationPage(new EditDogeProfilePage());
             //App.Current.Properties["currentuserid"] = 0;
-            //MainPage = new GroomingInfoPage(0);
+            //DataControl.LoadTestUser();
+            //MainPage = new VetClinicsPage();
         }
 
         private void CreateClient()

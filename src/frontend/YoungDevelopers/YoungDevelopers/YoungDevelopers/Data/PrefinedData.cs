@@ -8,7 +8,7 @@ namespace YoungDevelopers
     {
         public static List<UserInfo> PredefinedUsers => new List<UserInfo>
         {
-            new UserInfo {Id = 1, Email = "spistsov@gmail.com", PhoneNumber = "8800553535", FirstName = "Сергей", LastName = "Писцов", MiddleName = "Михайлович", BirthDate = new DateTime(2001, 10, 20)}, // Billy1!
+            new UserInfo {Id = 1, Email = "spistsov@gmail.com", PhoneNumber = "8800553535", FirstName = "Сыргей", LastName = "Писцов", MiddleName = "Михайлович", BirthDate = new DateTime(2001, 10, 20)}, // Billy1!
             new UserInfo {Id = 2, Email = "adonis7952@gmail.com", PhoneNumber = "89523335325", FirstName = "Василий", LastName = "Балчиков", MiddleName = "Игоревич", BirthDate = new DateTime(2001, 4, 13)}, // Admin123@
             new UserInfo {Id = 3, Email = "katya.myr.23@yandex.ru", PhoneNumber = "89525915325", FirstName = "Екатерина", LastName = "Гладких", MiddleName = "Алексеевна", BirthDate = new DateTime(2001, 10, 19)}, // simplePassword1!
         };

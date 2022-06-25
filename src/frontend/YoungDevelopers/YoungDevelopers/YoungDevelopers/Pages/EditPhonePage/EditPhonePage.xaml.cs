@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DogsCompanion.Api.Client;
+using Microsoft.AspNetCore.Http;
+using System;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -9,13 +11,15 @@ namespace YoungDevelopers
     public partial class EditPhonePage : ContentPage
     {
         #region Инициализация 
+        private UserInfo user;
         private StackLayout layout;
         private MaskedEntry me_phone;
         private Frame fr_phone, fr_password;
         private Button bt_save;
         private ControlEntry en_password;
         private Label lb_main_fields, lb_phone, lb_phone_er, lb_phone_exists, lb_password, lb_password_er;
-        private Regex re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
+        DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
+        private Regex re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$");
         #endregion
         public EditPhonePage()
         {
@@ -23,6 +27,11 @@ namespace YoungDevelopers
             layout = new StackLayout();
             layout.Orientation = StackOrientation.Vertical;
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
+
+            // Получение данных
+            //App.Current.Properties["currentuserid"] = 1;
+            user = DataControl.GetCurrentUserItem();
+
 
             #region Элементы страницы
             // Телефон
@@ -40,6 +49,7 @@ namespace YoungDevelopers
 
             me_phone = new MaskedEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Mask = "+7 (XXX) XXX-XX-XX",
@@ -98,6 +108,7 @@ namespace YoungDevelopers
 
             en_password = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "**********",
@@ -125,6 +136,19 @@ namespace YoungDevelopers
 
             layout.Children.Add(fr_password);
 
+            // Пользователь с таким номером телефона уже зарегистрирован
+            lb_password_er = new Label()
+            {
+                IsVisible = false,
+                FontFamily = "Cascadia Code Light",
+                Text = "Пароль должен содержать хотя бы одну цифру, латинскую букву в нижнем регистре, латинскую букву в верхнем регистре и спецсимвол",
+                Margin = new Thickness(15, -5, 0, -1),
+                VerticalOptions = LayoutOptions.Start,
+                TextColor = Color.Red,
+            };
+
+            layout.Children.Add(lb_password_er);
+
             // Кнопка Сохранить изменения
             bt_save = new Button()
             {
@@ -149,17 +173,29 @@ namespace YoungDevelopers
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Пользователь с такой почтой уже зарегистрирован",
+                Text = "Пользователь с таким номером телефона уже зарегистрирован",
                 Margin = new Thickness(15, -5, 0, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,
             };
 
-            layout.Children.Add(lb_phone_exists);
+            // Пользователь с таким номером телефона уже зарегистрирован
+            lb_main_fields = new Label()
+            {
+                IsVisible = false,
+                FontFamily = "Cascadia Code Light",
+                Text = "Не заполнены обязательные поля",
+                Margin = new Thickness(15, -5, 0, -1),
+                VerticalOptions = LayoutOptions.Start,
+                TextColor = Color.Red,
+            };
+
+            layout.Children.Add(lb_main_fields);
             #endregion
 
             this.Content = layout;
             InitializeComponent();
+            UpdateFieldsFromServer();
         }
 
         #region Обработка событий
@@ -260,11 +296,122 @@ namespace YoungDevelopers
         public async void OnSaveClicked(object sender, EventArgs e)
         {
             //lb_phone_exists и еще кучу всего
+            lb_main_fields.IsVisible = false;
+            if (en_password.Text == "" && me_phone.Text == "")
+            {
+                return;
+            }
+            else
+            {
+                if (fr_password.BorderColor == Color.FromRgb(194, 85, 85) || fr_phone.BorderColor == Color.FromRgb(194, 85, 85))
+                {
+                    return;
+                }
+                else
+                {
+                    if (en_password.Text == "" || me_phone.Text == "")
+                    {
+                        lb_main_fields.IsVisible = true;
+                    }
+                    else
+                    {
+                        ChangePhoneRequest changePhone = new ChangePhoneRequest();
+                        changePhone.NewPhoneNumber = me_phone.Text;
+                        changePhone.Password = en_password.Text;
 
-            // ВЫЛЕТАЕТ ПАКОСТЬ
-            await Navigation.PopAsync();
+                        try
+                        {
+                            await dogsCompanionClient.ChangePhoneAsync(changePhone);
+                            await Navigation.PopAsync();
+                        }
+                        catch (ApiException ex)
+                        {
+                            if (ex.Response == "Phone already in use")
+                            {
+                                await DisplayAlert("Ошибка", "Номер телефона уже зарегистрирован", "OK");
+                            }
+                            else
+                            {
+                                await DisplayAlert("Ошибка", ex.Message, "OK");
+                            }
+                            
+                        }
+                    }
+                }
+            }
         }
 
         #endregion
+
+        public async void UpdateFieldsFromServer()
+        {
+            //#region подгрузка
+            //string email = "spistsov@gmail.com";
+            //string password = "Billy1!";
+            //SendAuth sendauth = new SendAuth();
+            //sendauth.email = email;
+            //sendauth.password = password;
+
+            //var httpClient = DataControl.httpClient;
+            //var tokenController = DataControl.tokenController;
+
+
+            //try
+            //{
+            //    var authInfo = new AuthInfo()
+            //    {
+            //        Email = email,
+            //        Password = password,
+            //    };
+
+            //    var authResponse = await dogsCompanionClient.AuthenticateAsync(authInfo);
+
+            //    // Установление ключа в httpclient
+            //    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
+
+            //    // Сохранение токенов в хранилище
+            //    await tokenController.SetRefreshTokenAsync(authResponse.RefreshToken);
+            //    await tokenController.SetAccessTokenAsync(authResponse.AccessToken);
+
+            //    // Установить текущего пользователя
+            //    DataControl.SetCurrentUser(authResponse);
+
+            //    // Переход на главную страницу
+            //    // TODO сохранить полученные данные из authInfo
+            //    // TODO поменять Main страницу
+            //}
+            //catch (ApiException apiExc)
+            //{
+            //    if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
+            //    {
+            //    }
+            //    else if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
+            //    {
+            //    }
+            //}
+            //catch (Exception)
+            //{
+            //}
+            //#endregion
+            UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
+
+            string phone = updateUser.PhoneNumber.ToString();
+            if (phone.StartsWith("+7"))
+            {
+                me_phone.Placeholder = phone;
+            }
+            else
+            {
+                try
+                {
+                    me_phone.Placeholder = "+7 (" + phone.Substring(1, 3) + ") " + phone.Substring(3, 3) + '-' + phone.Substring(7, 2) + '-' + phone.Substring(9, 2);
+                }
+                catch (Exception e)
+                {
+                    me_phone.Placeholder = phone;
+                }
+            }
+            
+        }
     }
 }

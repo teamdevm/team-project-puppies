@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DogsCompanion.Api.Client;
+using Microsoft.AspNetCore.Http;
+using System;
 using System.Text.RegularExpressions;
 
 using Xamarin.Forms;
@@ -10,14 +12,16 @@ namespace YoungDevelopers
     public partial class EditEmailPage : ContentPage
     {
         #region Инициализация 
+        private UserInfo user;
         private StackLayout layout;
         private Label lb_email,lb_main_fields, lb_email_exists, lb_email_er, lb_password, lb_password_er;
         private ControlEntry en_email, en_password;
         private Frame fr_email, fr_password;
         private Button bt_save;
+        private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
         private Regex
             re_email = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"),
-            re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
+            re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$");
         #endregion
         public EditEmailPage()
         {
@@ -26,6 +30,8 @@ namespace YoungDevelopers
             layout.Orientation = StackOrientation.Vertical;
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
 
+            // Получение данных
+            user = DataControl.GetCurrentUserItem();
             #region Элементы страницы
 
             // E-mail
@@ -43,9 +49,10 @@ namespace YoungDevelopers
 
             en_email = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
-                Placeholder = "ivanivanov@mail.ru",
+                Placeholder = user.Email,
                 MyTintColor = Color.Transparent,
                 MyHighlightColor = Color.Gray,
                 Keyboard = Keyboard.Email,
@@ -98,6 +105,7 @@ namespace YoungDevelopers
 
             en_password = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "**********",
@@ -124,6 +132,20 @@ namespace YoungDevelopers
             };
 
             layout.Children.Add(fr_password);
+
+            // Ошибка при вводе пароля
+            lb_password_er = new Label()
+            {
+                IsVisible = false,
+                FontFamily = "Cascadia Code Light",
+                Text = "Пароль должен содержать хотя бы одну цифру, латинскую букву в нижнем регистре, латинскую букву в верхнем регистре и спецсимвол",
+                Margin = new Thickness(15, -5, 0, -1),
+                VerticalOptions = LayoutOptions.Start,
+                TextColor = Color.Red,
+            };
+
+            layout.Children.Add(lb_password_er);
+
 
             // Кнопка Сохранить изменения
             bt_save = new Button()
@@ -154,7 +176,9 @@ namespace YoungDevelopers
                 TextColor = Color.Red,
             };
 
-            // Пользователь с такой почтой уже зарегистрирован
+            layout.Children.Add(lb_main_fields);
+
+            // Пользователь с такой почтой уже зарегистрирован / пароль неправильный
             lb_email_exists = new Label()
             {
                 IsVisible = false,
@@ -171,6 +195,7 @@ namespace YoungDevelopers
 
             this.Content = layout;
             InitializeComponent();
+            UpdateFieldsFromServer();
         }
 
         #region Обработка событий
@@ -272,11 +297,62 @@ namespace YoungDevelopers
         public async void OnSaveClicked(object sender, EventArgs e)
         {
             //lb_email_exists и еще кучу всегоs
-            await Navigation.PopAsync();
+            //await Navigation.PopAsync();
+
+            lb_main_fields.IsVisible = false;
+            if (en_email.Text == "" && en_password.Text == "")
+            {
+                return;
+            }
+            else
+            {
+                if (fr_email.BorderColor == Color.FromRgb(194, 85, 85) || fr_password.BorderColor == Color.FromRgb(194, 85, 85))
+                {
+                    return;
+                }
+                else
+                {
+                    if (en_email.Text == "" || en_password.Text == "")
+                    {
+                        lb_main_fields.IsVisible = true;
+                    }
+                    else
+                    {
+                        ChangeEmailRequest changeEmail = new ChangeEmailRequest();
+                        changeEmail.Email = en_email.Text;
+                        changeEmail.Password = en_password.Text;
+
+                        try
+                        {
+                            await dogsCompanionClient.ChangeEmailAsync(changeEmail);
+                            await Navigation.PopAsync();
+                        }
+                        catch (ApiException ex)
+                        {
+                            // ПОФИКСИТЬ
+                            if (ex.Response == "Email already in use")
+                            {
+                                await DisplayAlert("Ошибка", "Почта уже используется", "OK");
+                            }
+                            else
+                            {
+                                await DisplayAlert("Ошибка", ex.Message, "OK");
+                            }
+
+                        }
+                    }
+                }
+            }
         }
-        
+
 
         #endregion
 
+        public async void UpdateFieldsFromServer()
+        {
+            UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
+
+            en_email.Placeholder = updateUser.Email.ToString();
+        }
     }
 }

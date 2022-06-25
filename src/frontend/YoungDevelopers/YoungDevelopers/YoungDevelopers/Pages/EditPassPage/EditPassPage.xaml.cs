@@ -1,4 +1,6 @@
-﻿using System;
+﻿    using DogsCompanion.Api.Client;
+using Microsoft.AspNetCore.Http;
+using System;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -9,14 +11,16 @@ namespace YoungDevelopers
     public partial class EditPassPage : ContentPage
     {
         #region Инициализация 
+        private UserInfo user;
         private StackLayout layout;
         private Button bt_save;
-        private Frame fr_password, fr_rep_password;
-        private Label lb_password, lb_rep_password, lb_password_er, lb_rep_password_er, lb_conc_pass_er, lb_main_fields;
-        private ControlEntry en_password, en_rep_password;
+        private Frame fr_password, fr_rep_password, fr_old_password;
+        private Label lb_old_password, lb_old_password_er, lb_password, lb_rep_password, lb_password_er, lb_rep_password_er, lb_conc_pass_er, lb_main_fields;
+        private ControlEntry en_password, en_rep_password, en_old_password;
+        private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
 
         private Regex
-            re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
+            re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$");
         #endregion
         public EditPassPage()
         {
@@ -25,13 +29,76 @@ namespace YoungDevelopers
             layout.Orientation = StackOrientation.Vertical;
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
 
+            // Получение данных
+            //App.Current.Properties["currentuserid"] = 1;
+            user = DataControl.GetCurrentUserItem();
+
             #region Элементы страницы
+
+            // Старый пароль
+
+            lb_old_password = new Label()
+            {
+                HorizontalOptions = LayoutOptions.Start,
+                Text = "Старый пароль *",
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontFamily = "Cascadia Code Light",
+                TextColor = Color.Black,
+                FontAttributes = FontAttributes.Bold,
+                Margin = new Thickness(15, 10, 0, 5),
+            };
+            layout.Children.Add(lb_old_password);
+
+            en_old_password = new ControlEntry()
+            {
+                Text = "",
+                FontFamily = "Cascadia Code Light",
+                Margin = new Thickness(-10, -15, 0, -17.5),
+                Placeholder = "**********",
+                IsPassword = true,
+                MyTintColor = Color.Transparent,
+                MyHighlightColor = Color.Gray,
+                BackgroundColor = Color.White,
+                VerticalTextAlignment = TextAlignment.Center
+            };
+
+            en_old_password.TextChanged += OnOldPasswordTextChanged;
+            en_old_password.Unfocused += OnOldPasswordUnfocused;
+            en_old_password.Focused += OnOldPasswordFocused;
+
+            fr_old_password = new Frame
+            {
+                Content = en_old_password,
+                CornerRadius = 10,
+                HeightRequest = 6,
+                BorderColor = Color.White,
+                IsClippedToBounds = true,
+                Margin = new Thickness(10, 0, 10, 10),
+                HasShadow = true,
+            };
+
+            layout.Children.Add(fr_old_password);
+
+            // Ошибка при вводе пароля
+            lb_old_password_er = new Label()
+            {
+                IsVisible = false,
+                FontFamily = "Cascadia Code Light",
+                Text = "Пароль должен содержать хотя бы одну цифру, латинскую букву в нижнем регистре, латинскую букву в верхнем регистре и спецсимвол",
+                Margin = new Thickness(15, -5, 10, -1),
+                VerticalOptions = LayoutOptions.Start,
+                TextColor = Color.Red,
+            };
+
+            layout.Children.Add(lb_old_password_er);
+
+            /////////
 
             // Пароль
             lb_password = new Label()
             {
                 HorizontalOptions = LayoutOptions.Start,
-                Text = "Пароль *",
+                Text = "Новый Пароль *",
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
@@ -42,6 +109,7 @@ namespace YoungDevelopers
 
             en_password = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "**********",
@@ -97,6 +165,7 @@ namespace YoungDevelopers
 
             en_rep_password = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "**********",
@@ -168,13 +237,120 @@ namespace YoungDevelopers
             layout.Children.Add(bt_save);
             bt_save.Clicked += OnSaveClicked;
 
+            lb_main_fields = new Label()
+            {
+                IsVisible = false,
+                FontFamily = "Cascadia Code Light",
+                Text = "Не заполнены обязательные поля",
+                Margin = new Thickness(15, -5, 0, -1),
+                VerticalOptions = LayoutOptions.Start,
+                TextColor = Color.Red,
+            };
+
+            layout.Children.Add(lb_main_fields);
+
             #endregion
 
             this.Content = layout;
             InitializeComponent();
+            UpdateFieldsFromServer();
         }
 
         #region Обработка событий
+
+        public async void OnSaveClicked(object sender, EventArgs e)
+        {
+            // ВСЕ ХУЙНЯ ВАЩЕ
+            lb_main_fields.IsVisible = false;
+            if ((en_password.Text == "" && en_rep_password.Text == "" && en_old_password.Text == "") || lb_conc_pass_er.IsVisible == true)
+            {
+                return;
+            }
+            else
+            {
+                if (fr_password.BorderColor == Color.FromRgb(194, 85, 85) || fr_rep_password.BorderColor == Color.FromRgb(194, 85, 85) || fr_old_password.BorderColor == Color.FromRgb(194, 85, 85))
+                {
+                    return;
+                }
+                else
+                {
+                    if (en_password.Text == "" || en_rep_password.Text == "" || en_old_password.Text == "")
+                    {
+                        lb_main_fields.IsVisible = true;
+                    }
+                    else
+                    {
+                        ChangePasswordRequest changePass = new ChangePasswordRequest();
+                        changePass.NewPassword = en_password.Text;
+                        changePass.CurrentPassword = en_old_password.Text;
+
+                        try
+                        {
+                            await dogsCompanionClient.ChangePasswordAsync(changePass);
+                            await Navigation.PopAsync();
+                        }
+                        catch (ApiException ex)
+                        {
+                            //ФИКСИТЬ
+                            if (ex.Response == "Not corrent old")
+                            {
+                                await DisplayAlert("Ошибка", "Неверный текущий пароль", "OK");
+                            }
+                            else
+                            {
+                                await DisplayAlert("Ошибка", ex.Message, "OK");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            await DisplayAlert("Ошибка", ex.Message, "OK");
+                        }
+                    }
+                }
+            }
+        }
+
+        public void OnOldPasswordTextChanged(object sender, EventArgs e)
+        {
+            lb_old_password_er.IsVisible = false;
+            fr_old_password.BorderColor = Color.White;
+            fr_old_password.BackgroundColor = Color.White;
+            en_old_password.BackgroundColor = Color.White;
+            en_old_password.TextColor = Color.Black;
+        }
+
+        public void OnOldPasswordFocused(object sender, EventArgs e)
+        {
+            fr_old_password.BorderColor = Color.SpringGreen;
+        }
+
+        public void OnOldPasswordUnfocused(object sender, EventArgs e)
+        {
+            fr_old_password.BorderColor = Color.White;
+            if (en_old_password.Text == "") return;
+            else
+            {
+                Match match = re_password.Match(en_old_password.Text);
+                if (!match.Success)
+                {
+                    lb_old_password_er.IsVisible = true;
+                    fr_old_password.BorderColor = Color.FromRgb(194, 85, 85);
+                    fr_old_password.BackgroundColor = Color.FromRgb(255, 187, 187);
+                    en_old_password.BackgroundColor = Color.FromRgb(255, 187, 187);
+                    en_old_password.TextColor = Color.FromRgb(194, 85, 85);
+                }
+                else
+                {
+                    lb_old_password_er.IsVisible = false;
+                    fr_old_password.BorderColor = Color.White;
+                    fr_old_password.BackgroundColor = Color.White;
+                    en_old_password.BackgroundColor = Color.White;
+                    en_old_password.TextColor = Color.Black;
+                    CheckRecField();
+                }
+            }
+        }
+        /////
 
         public void OnPasswordTextChanged(object sender, EventArgs e)
         {
@@ -201,7 +377,7 @@ namespace YoungDevelopers
         public void OnPasswordUnfocused(object sender, EventArgs e)
         {
             fr_password.BorderColor = Color.White;
-            if (en_password.Text == "" || en_password.Text == null) return;
+            if (en_password.Text == "" || en_rep_password.Text == null) return;
             else
             {
                 Match match = re_password.Match(en_password.Text);
@@ -233,7 +409,7 @@ namespace YoungDevelopers
         {
             if (lb_main_fields.IsVisible == true)
             {
-                if (lb_conc_pass_er.IsVisible == false && fr_password.BorderColor == Color.White && fr_rep_password.BorderColor == Color.White)
+                if (lb_conc_pass_er.IsVisible == false && fr_password.BorderColor == Color.White && fr_rep_password.BorderColor == Color.White && fr_old_password.BorderColor == Color.White)
                 {
                     lb_main_fields.IsVisible = false;
                 }
@@ -265,7 +441,7 @@ namespace YoungDevelopers
         public void OnRepPasswordUnfocused(object sender, EventArgs e)
         {
             fr_rep_password.BorderColor = Color.White;
-            if (en_rep_password.Text == "" || en_rep_password.Text == null) return;
+            if (en_password.Text == "" || en_rep_password.Text == null) return;
             else
             {
                 Match match = re_password.Match(en_rep_password.Text);
@@ -293,13 +469,12 @@ namespace YoungDevelopers
             }
         }
 
-        public async void OnSaveClicked(object sender, EventArgs e)
-        {
-            //lb_email_exists и еще кучу всегоs
-            await Navigation.PopAsync();
-        }
-
         #endregion
 
+        public async void UpdateFieldsFromServer()
+        {
+            
+            UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
+        }
     }
 }

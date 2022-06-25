@@ -3,32 +3,32 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Text.RegularExpressions;
 using System.Linq;
+using DogsCompanion.Api.Client;
+using System.Net.Http;
+using YoungDevelopers.Client;
+using Microsoft.AspNetCore.Http;
 
 namespace YoungDevelopers
 {
-    public class SendDogRegistration
-    {
-        public string nickname = "",
-            breed = "",
-            weight = "",
-            birthdate = "";
-    }
 
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class DogAddPage : ContentPage
     {
         #region Инициализация 
         private bool hasDate = false;
-        private StackLayout layout;
+        private StackLayout main, layout;
         private ScrollView scrollview;
         private Image im_doge;
         private Frame fr_nickname, fr_breed, fr_weight, fr_birthdate;
         private ControlEntry en_nickname, en_breed, en_weight;
         private DatePickerControl dp_birthdate;
         private Label lb_musthave, lb_nickname, lb_breed, lb_weight, lb_birthdate, lb_nickname_er, lb_breed_er, lb_weight_er,
-            lb_main_fields;
+            lb_main_fields, lb_reg_er;
         private Button bt_registrate, bt_upload_doge;
-        private SendDogRegistration senddogreg;
+        private SendRegistraion userInfo;
+        private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
+        private HttpClient httpClient = DataControl.httpClient;
+        private TokenController tokenController = DataControl.tokenController;
         private Regex
             re_nickname = new Regex(@"^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$"),
             re_weight = new Regex("[+-]?([0-9]*[.])?[0-9]+");
@@ -36,10 +36,21 @@ namespace YoungDevelopers
         #endregion
 
         //SendRegistraion RegFields
-        public DogAddPage()
+        public DogAddPage(SendRegistraion userInfo_input)
         {
             this.Title = "Регистрация собаки";
-            layout = new StackLayout();
+            layout = new StackLayout()
+            {
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                Orientation = StackOrientation.Vertical
+            };
+            scrollview = new ScrollView();
+            main = new StackLayout()
+            {
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                Orientation = StackOrientation.Vertical
+            };
+            userInfo = userInfo_input;
             layout.Orientation = StackOrientation.Vertical;
             layout.VerticalOptions = LayoutOptions.FillAndExpand;
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
@@ -103,6 +114,7 @@ namespace YoungDevelopers
 
             en_nickname = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "Стасян",
@@ -158,6 +170,7 @@ namespace YoungDevelopers
 
             en_breed = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "Мопсик",
@@ -213,9 +226,10 @@ namespace YoungDevelopers
 
             en_weight = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
-                Placeholder = "15.0",
+                Placeholder = "15",
                 MyTintColor = Color.Transparent,
                 MyHighlightColor = Color.Gray,
                 BackgroundColor = Color.White,
@@ -268,6 +282,7 @@ namespace YoungDevelopers
 
             dp_birthdate = new DatePickerControl()
             {
+                Date = DateTime.Now,
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-5, -15, 0, -12),
                 TextColor = Color.Gray,
@@ -302,7 +317,7 @@ namespace YoungDevelopers
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
-                Margin = new Thickness(0, 0, 0, 10),
+                Margin = new Thickness(0, 15, 0, 10),
             };
 
             layout.Children.Add(bt_registrate);
@@ -314,22 +329,34 @@ namespace YoungDevelopers
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
                 Text = "Не заполнены обязательные поля",
-                Margin = new Thickness(15, -5, 0, -1),
+                Margin = new Thickness(15, -10, 0, 5),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,
             };
 
             layout.Children.Add(lb_main_fields);
 
+            // Ошибка регистрации
+            lb_reg_er = new Label()
+            {
+                IsVisible = false,
+                FontFamily = "Cascadia Code Light",
+                Text = "",
+                Margin = new Thickness(15, -5, 0, -1),
+                VerticalOptions = LayoutOptions.Start,
+                TextColor = Color.Red,
+            };
+
+            layout.Children.Add(lb_reg_er);
+
             #endregion
 
             // Контент страницы
-            scrollview = new ScrollView();
             scrollview.Content = layout;
             scrollview.VerticalOptions = LayoutOptions.FillAndExpand;
-            this.Content = scrollview;
-
-            InitializeComponent(); 
+            main.Children.Add(scrollview);
+            this.Content = main;
+            InitializeComponent();
         }
 
         #region Обработка событий
@@ -338,7 +365,7 @@ namespace YoungDevelopers
         {
             if (lb_main_fields.IsVisible == true)
             {
-                if (fr_nickname.BorderColor == Color.White && fr_breed.BorderColor == Color.White && fr_birthdate.BorderColor == Color.White && fr_weight.BorderColor == Color.White)
+                if (en_nickname.Text != "" && en_breed.Text != "" && en_weight.Text != "" && fr_nickname.BorderColor == Color.White && fr_breed.BorderColor == Color.White && fr_weight.BorderColor == Color.White)
                 {
                     lb_main_fields.IsVisible = false;
                 }
@@ -354,34 +381,94 @@ namespace YoungDevelopers
         private async void OnRegistrateClicked(object sender, EventArgs e)
         {
             //await Navigation.PushAsync(new MainPageDoge());
-            App.Current.MainPage = new MainPage();
-
-            if (fr_nickname.BackgroundColor == Color.FromRgb(194, 85, 85) || fr_breed.BackgroundColor == Color.FromRgb(194, 85, 85) || fr_weight.BackgroundColor == Color.FromRgb(194, 85, 85) ||
-                lb_main_fields.IsVisible == true)
+            lb_main_fields.IsVisible = false;
+            if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Now.Date.ToString("dd.MM.yyyy") && en_nickname.Text == "" && en_breed.Text == "" && en_weight.Text == "")
             {
-                lb_main_fields.IsVisible = true;
-            }
-            else if (en_nickname.Text == "" || en_nickname.Text == null || en_breed.Text == "" || en_breed.Text == null || en_weight.Text == "" || en_weight.Text == null)
-            {
-                lb_main_fields.IsVisible = true;
+                
+                return;
             }
             else
             {
-                lb_main_fields.IsVisible = false;
-
-                senddogreg = new SendDogRegistration();
-
-                senddogreg.nickname = en_nickname.Text;
-                senddogreg.breed = en_breed.Text;
-                if (hasDate)
+                if (fr_nickname.BorderColor == Color.FromRgb(194, 85, 85) || fr_breed.BorderColor == Color.FromRgb(194, 85, 85) || fr_weight.BorderColor == Color.FromRgb(194, 85, 85))
                 {
-                    senddogreg.birthdate = dp_birthdate.Date.ToString("dd.MM.yyyy");
-                } 
-                senddogreg.weight = en_weight.Text;
+                    return;
+                }
+                else
+                {
+                    if (en_nickname.Text == "" || en_breed.Text == "" || en_weight.Text == "")
+                    {
+                        lb_main_fields.IsVisible = true;
+                        return;
+                    }
+                    //RegisterInfo
+                    UpdateDog createDog = new UpdateDog();
+                    createDog.Name = en_nickname.Text;
+                    createDog.Breed = en_breed.Text;
+                    createDog.Weight = Int32.Parse(en_weight.Text);
+                    if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Now.Date.ToString("dd.MM.yyyy"))
+                    {
+                        createDog.BirthDate = null;
+                    }
+                    else
+                    {
+                        createDog.BirthDate = dp_birthdate.Date;
+                    }
 
-                //Вася ты где блин ну
+                    RegisterInfo registerInfo = new RegisterInfo();
+                    registerInfo.FirstName = userInfo.firstname;
+                    registerInfo.LastName = userInfo.lastname;
+                    registerInfo.MiddleName = userInfo.patronymic;
+                    registerInfo.Email = userInfo.email;
+                    registerInfo.BirthDate = userInfo.birthdate;
+                    registerInfo.PhoneNumber = userInfo.phone;
+                    registerInfo.Password = userInfo.password;
+                    registerInfo.Dog = createDog;
 
-                await Navigation.PushAsync(new MainPage());
+                    try
+                    {
+                        RegisterResponse response = await dogsCompanionClient.RegisterUserAsync(registerInfo);
+
+                        await DisplayAlert("Error", response.IsEmailInUse.ToString(), "OK");
+                        if (response.IsEmailInUse)
+                        {
+                            lb_reg_er.Text = "Такой E-mail уже зарегистрирован";
+                            await DisplayAlert("Error", "email is use", "OK");
+                            lb_reg_er.IsVisible = true;
+                            return;
+                        }
+
+                        if (response.IsPhoneInUse)
+                        {
+                            lb_reg_er.Text = "Пользователь с таким номером телефона уже зарегистрирован";
+                            lb_reg_er.IsVisible = true;
+                            return;
+                        }
+
+                        // Установление ключа в httpclient
+                        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", response.AccessToken);
+
+                        // Сохранение токенов в хранилище
+                        await tokenController.SetRefreshTokenAsync(response.RefreshToken);
+                        await tokenController.SetAccessTokenAsync(response.AccessToken);
+                                             
+
+                        // Установить текущего пользователя
+                        DataControl.SetNewCurrentUser(response);
+                        App.Current.MainPage = new MainPage();
+                    }
+                    catch (ApiException apiExc)
+                    {
+                        if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
+                        {
+                            lb_reg_er.Text = "Сервис недоступен";
+                            lb_reg_er.IsVisible = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await DisplayAlert("Error", ex.Message, "OK");
+                    }
+                }             
             }
         }
 
@@ -433,7 +520,6 @@ namespace YoungDevelopers
 
         private void OnBreedUnfocused(object sender, EventArgs e)
         {
-            fr_breed.BorderColor = Color.White;
             if (en_breed.Text == "" || en_breed.Text == null) return;
             else
             {
@@ -474,7 +560,6 @@ namespace YoungDevelopers
 
         private void OnWeightUnfocused(object sender, EventArgs e)
         {
-            fr_weight.BorderColor = Color.White;
             if (en_weight.Text == "" || en_weight.Text == null) return;
             else
             {

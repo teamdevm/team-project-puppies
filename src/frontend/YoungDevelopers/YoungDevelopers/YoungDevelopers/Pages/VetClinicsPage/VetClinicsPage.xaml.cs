@@ -23,6 +23,7 @@ namespace YoungDevelopers
         [Obsolete]
         public VetClinicsPage()
         {
+            
             Title = "Список ветклиник";
             layout = new StackLayout();
             layout.Orientation = StackOrientation.Vertical;
@@ -92,7 +93,8 @@ namespace YoungDevelopers
 
         public async void OnVetPressed(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new VetClinicInfoPage());
+            int id = ((CustomButton)sender).ItemId;
+            await Navigation.PushAsync(new VetClinicInfoPage(id));
         }
 
         #endregion
