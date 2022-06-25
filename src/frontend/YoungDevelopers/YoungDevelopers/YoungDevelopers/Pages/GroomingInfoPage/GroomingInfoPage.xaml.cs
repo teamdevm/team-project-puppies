@@ -84,7 +84,30 @@ namespace YoungDevelopers
                 TextColor = Color.Black,
                 FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(15, 0, 0, 0),
+                TextDecorations = TextDecorations.Underline,
             };
+
+            System.Windows.Input.ICommand command = new Command<string>((url) =>
+            {
+                try
+                {
+                    string formttedUrl = url;
+                    if (!url.StartsWith("http"))
+                    {
+                        formttedUrl = $"http://{url}";
+                    }
+                    Xamarin.Essentials.Launcher.OpenAsync(formttedUrl);
+                }
+                catch (Exception)
+                {
+                }
+            });
+
+            lb_site.GestureRecognizers.Add(new TapGestureRecognizer()
+            {
+                Command = command,
+                CommandParameter = GroomSalon.Link
+            });
 
             layout.Children.Add(lb_site);
 
