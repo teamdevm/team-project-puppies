@@ -4,11 +4,13 @@ using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using XamrinTemp.Droid;
 using YoungDevelopers;
-using YoungDevelopers.Droid;
 
+#pragma warning disable CS0612 // Type or member is obsolete
 [assembly: ExportRenderer(typeof(CustomButton), typeof(CustomButtonRenderer))]
+#pragma warning restore CS0612 // Type or member is obsolete
 namespace XamrinTemp.Droid
 {
+    [System.Obsolete]
     public class CustomButtonRenderer : ButtonRenderer
     {
         public new CustomButton Element

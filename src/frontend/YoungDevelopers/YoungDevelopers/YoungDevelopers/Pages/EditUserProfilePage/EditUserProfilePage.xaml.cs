@@ -1,38 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using DogsCompanion.Api.Client;
+using Microsoft.AspNetCore.Http;
+using System;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace YoungDevelopers
 {
-
-    public class SaveChanges
-    {
-        public string lastname = "",
-            firstname = "",
-            patronymic = "",
-            birthdate = "";
-    }
-
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class EditUserProfilePage : ContentPage
     {
         #region Инициализация 
 
-        private bool hasDate = false;
+        private UserInfo user;
         private ScrollView scrollview;
-        private StackLayout layout, sl_approve;
-        private Label lb_musthave, lb_lastname, lb_firstname, lb_patronymic, lb_birthdate, lb_lastname_er, lb_firstname_er, lb_patronymic_er, lb_conc_pass_er, lb_main_fields;
+        private StackLayout layout;
+        private Label lb_lastname, lb_firstname, lb_patronymic, lb_birthdate, lb_lastname_er, lb_firstname_er, lb_patronymic_er, lb_conc_pass_er, lb_main_fields, lb_update_er;
         private ControlEntry en_lastname, en_firstname, en_patronymic;
         private Frame fr_lastname, fr_firstname, fr_patronymic, fr_birthdate;
         private Button bt_save, bt_editemail, bt_editphone, bt_editpass;
         private DatePickerControl dp_birthdate;
-        private SaveChanges savechanges;
+        DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
         private Regex
             re_lastname = new Regex(@"^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$");
 
@@ -40,27 +28,16 @@ namespace YoungDevelopers
 
         public EditUserProfilePage()
         {
-            Title = "Редактирование профиля пользователя";
+            Title = "Редактирование профиля";
             layout = new StackLayout();
             scrollview = new ScrollView();
             layout.Orientation = StackOrientation.Vertical;
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
 
+            // Получение данных
+            user = DataControl.GetCurrentUserItem();
+
             #region Элементы страницы
-
-            // Label обязательные поля
-            lb_musthave = new Label()
-            {
-                HorizontalTextAlignment = TextAlignment.Start,
-                Text = "* Обязательное поле",
-                FontFamily = "Cascadia Code Light",
-                TextColor = Color.Black,
-                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
-                Margin = new Thickness(15, 5, 0, 15),
-                FontAttributes = FontAttributes.Bold,
-            };
-
-            layout.Children.Add(lb_musthave);
 
             // Фамилия
             lb_lastname = new Label()
@@ -77,9 +54,10 @@ namespace YoungDevelopers
 
             en_lastname = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
-                Placeholder = "Иванов",
+                Placeholder = user.LastName.ToString(),
                 MyTintColor = Color.Transparent,
                 MyHighlightColor = Color.Gray,
                 BackgroundColor = Color.White,
@@ -120,7 +98,7 @@ namespace YoungDevelopers
             lb_firstname = new Label()
             {
                 HorizontalOptions = LayoutOptions.Start,
-                Text = "Имя *",
+                Text = "Имя",
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
@@ -131,9 +109,10 @@ namespace YoungDevelopers
 
             en_firstname = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
-                Placeholder = "Иван",
+                Placeholder = user.FirstName,
                 MyTintColor = Color.Transparent,
                 MyHighlightColor = Color.Gray,
                 BackgroundColor = Color.White,
@@ -185,9 +164,10 @@ namespace YoungDevelopers
 
             en_patronymic = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
-                Placeholder = "Иванович",
+                Placeholder = user.MiddleName.ToString(),
                 MyTintColor = Color.Transparent,
                 MyHighlightColor = Color.Gray,
                 BackgroundColor = Color.White,
@@ -239,14 +219,12 @@ namespace YoungDevelopers
 
             dp_birthdate = new DatePickerControl()
             {
+                Date = user.BirthDate == null ? DateTime.Now : DateTime.Parse(user.BirthDate.ToString()),
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-5, -15, 0, -12),
                 TextColor = Color.Gray,
                 Format = "dd.MM.yyyy",
             };
-
-
-            dp_birthdate.DateSelected += OnDateSelected;
 
             fr_birthdate = new Frame
             {
@@ -269,7 +247,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -278,6 +256,18 @@ namespace YoungDevelopers
 
             layout.Children.Add(bt_save);
             bt_save.Clicked += OnSaveClicked;
+
+            lb_update_er = new Label()
+            {
+                IsVisible = false,
+                FontFamily = "Cascadia Code Light",
+                Text = "Ошибка при обновлении информации",
+                Margin = new Thickness(15, -5, 0, -1),
+                VerticalOptions = LayoutOptions.Start,
+                TextColor = Color.Red,
+            };
+
+            layout.Children.Add(lb_update_er);
 
             // Не заполнены обязательные поля
             lb_main_fields = new Label()
@@ -290,6 +280,8 @@ namespace YoungDevelopers
                 TextColor = Color.Red,
             };
 
+            layout.Children.Add(lb_main_fields);
+
             bt_editemail = new Button()
             {
                 Text = "Редактировать почту",
@@ -297,7 +289,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -314,7 +306,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -331,7 +323,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -347,9 +339,10 @@ namespace YoungDevelopers
             scrollview.VerticalOptions = LayoutOptions.FillAndExpand;
             this.Content = scrollview;
             InitializeComponent();
+            UpdateFieldsFromServer();
         }
 
-         #region Обработка событий
+        #region Обработка событий
 
         public void CheckRecField()
         {
@@ -379,7 +372,7 @@ namespace YoungDevelopers
 
         public void OnLastNameFocused(object sender, EventArgs e)
         {
-            fr_lastname.BorderColor = Color.SpringGreen;
+            fr_lastname.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnLastNameUnfocused(object sender, EventArgs e)
@@ -415,11 +408,12 @@ namespace YoungDevelopers
             fr_firstname.BackgroundColor = Color.White;
             en_firstname.BackgroundColor = Color.White;
             en_firstname.TextColor = Color.Black;
+            lb_main_fields.IsVisible = false;
         }
 
         public void OnFirstNameFocused(object sender, EventArgs e)
         {
-            fr_firstname.BorderColor = Color.SpringGreen;
+            fr_firstname.BorderColor = Color.FromRgb(105,233,165);
         }
         public void OnFirstNameUnfocused(object sender, EventArgs e)
         {
@@ -459,7 +453,7 @@ namespace YoungDevelopers
 
         public void OnPatronymicFocused(object sender, EventArgs e)
         {
-            fr_patronymic.BorderColor = Color.SpringGreen;
+            fr_patronymic.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnPatronymicUnfocused(object sender, EventArgs e)
@@ -486,50 +480,83 @@ namespace YoungDevelopers
                     en_patronymic.TextColor = Color.Black;
                 }
             }
-        }        
+        }
 
         public void OnApproveCheckedChanged(object sender, EventArgs e)
         {
             CheckRecField();
         }
-
-        public void OnDateSelected(object sender, EventArgs e)
-        {
-            hasDate = true;
-        }
-
         public async void OnSaveClicked(object sender, EventArgs e)
         {
-            await Navigation.PopAsync();
+            lb_update_er.IsVisible = false;
+            if ((dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Now.Date.ToString("dd.MM.yyyy") || dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Parse(user.BirthDate.ToString()).ToString("dd.MM.yyyy")) && en_firstname.Text == "" && en_lastname.Text == "" && en_patronymic.Text == "")
+            {
+                return;
+            }
+            else
+            {
+                if (fr_lastname.BorderColor == Color.FromRgb(194, 85, 85) || fr_firstname.BorderColor == Color.FromRgb(194, 85, 85) || fr_patronymic.BorderColor == Color.FromRgb(194, 85, 85) || fr_birthdate.BorderColor == Color.FromRgb(194, 85, 85))
+                {
+                    return;
+                }
+                else
+                {
+                    UpdateUser updateUser = new UpdateUser();
 
-            //if (fr_lastname.BackgroundColor == Color.FromRgb(194, 85, 85) || fr_firstname.BackgroundColor == Color.FromRgb(194, 85, 85) || fr_patronymic.BackgroundColor == Color.FromRgb(194, 85, 85) || fr_birthdate.BackgroundColor == Color.FromRgb(194, 85, 85)
-            //     || lb_conc_pass_er.IsVisible == true || lb_main_fields.IsVisible == true)
-            //{
-            //    lb_main_fields.IsVisible = true;
-            //}
-            //else if (en_lastname.Text == "" || en_lastname.Text == null)
-            //{
-            //    lb_main_fields.IsVisible = true;
-            //}
-            //else
-            //{
-            //    lb_main_fields.IsVisible = false;
-            //    savechanges = new SaveChanges();
-            //    // if not empty
-            //    savechanges.lastname = en_lastname.Text;
-            //    savechanges.firstname = en_firstname.Text;
-            //    savechanges.patronymic = en_patronymic.Text;
-            //    if (hasDate)
-            //    {
-            //        savechanges.birthdate = dp_birthdate.Date.ToString("dd.MM.yyyy");
-            //    }
+                    if (en_firstname.Text == "")
+                    {
+                        updateUser.FirstName = user.FirstName;
+                    }
+                    else
+                    {
+                        updateUser.FirstName = en_firstname.Text;
+                    }
 
-            //    await Navigation.PopAsync();
+                    if (en_lastname.Text == "")
+                    {
+                        updateUser.LastName = user.LastName;
+                    }
+                    else
+                    {
+                        updateUser.LastName = en_lastname.Text;
+                    }
+                    if (en_patronymic.Text == "")
+                    {
+                        updateUser.MiddleName = user.MiddleName;
+                    }
+                    else
+                    {
+                        updateUser.MiddleName = en_patronymic.Text;
+                    }
 
-            //    // Отправить Васе + ошибку сделать
-            //    //lb_phone_exists
-            //    //lb_email_exists
-            //}
+                    if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Now.Date.ToString("dd.MM.yyyy"))
+                    {
+                        updateUser.BirthDate = user.BirthDate;
+                    }
+                    else
+                    {
+                        updateUser.BirthDate = dp_birthdate.Date;
+                    }
+
+                    try
+                    {
+                        await dogsCompanionClient.UpdateUserAsync(updateUser);
+                        await Navigation.PopAsync();
+                    }
+                    catch (ApiException apiExc)
+                    {
+                        if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
+                        {
+                            lb_update_er.Text = "Сервис недоступен";
+                            lb_update_er.IsVisible = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        await DisplayAlert("Error", ex.Message, "OK");
+                    }
+                }
+            } 
         }
 
         public async void OnEditEmailClicked(object sender, EventArgs e)
@@ -548,5 +575,23 @@ namespace YoungDevelopers
         }
 
         #endregion
+
+        public async void UpdateFieldsFromServer()
+        {
+            try
+            {
+                UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
+
+                en_lastname.Placeholder = updateUser.LastName.ToString();
+                en_firstname.Placeholder = updateUser.FirstName;
+                en_patronymic.Placeholder = updateUser.MiddleName.ToString();
+                dp_birthdate.Date = updateUser.BirthDate == null ? DateTime.Now : DateTime.Parse(user.BirthDate.ToString());
+            }
+            catch (Exception e)
+            {
+                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+            }
+        }
     }
 }
+

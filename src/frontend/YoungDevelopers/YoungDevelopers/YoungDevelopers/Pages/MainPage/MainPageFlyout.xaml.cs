@@ -1,6 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using DogsCompanion.Api.Client;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -10,11 +10,15 @@ namespace YoungDevelopers
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainPageFlyout : ContentPage
     {
+        private UserInfo user;
         public ListView ListView;
-        public static string AccountName = "Стасян";
+        public static string AccountName = "";
+        private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
 
         public MainPageFlyout()
         {
+            user = DataControl.GetCurrentUserItem();
+            AccountName = user.FirstName;
             InitializeComponent();
 
             BindingContext = new MainPageFlyoutViewModel();
@@ -32,7 +36,6 @@ namespace YoungDevelopers
                     new MainPageFlyoutMenuItem { Id = 0, Title = "Профиль собаки", TargetType = typeof(MainPageDetail) },
                     new MainPageFlyoutMenuItem { Id = 1, Title = "Профиль пользователя", TargetType = typeof(UserProfilePage) },
                     new MainPageFlyoutMenuItem { Id = 2, Title = "Записаться на процедуры", TargetType = typeof(ProcRegPage) },
-                    new MainPageFlyoutMenuItem { Id = 3, Title = "Напоминания", TargetType = typeof(ForgetPassPage) },
                 });
             }
 

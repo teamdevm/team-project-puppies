@@ -10,21 +10,20 @@ namespace YoungDevelopers
         public string lastname = "",
             firstname = "",
             patronymic = "",
-            birthdate = "",
             phone = "",
             email = "",
             password = "";
+        public DateTimeOffset? birthdate = null;
     }
 
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class RegistrationPage : ContentPage
     {
         #region Инициализация 
-        private bool hasDate = false;
         private ScrollView scrollview;
-        private StackLayout layout, sl_approve;
+        private StackLayout main, layout, sl_approve;
         private Label lb_musthave, lb_lastname, lb_firstname, lb_patronymic, lb_birthdate, lb_phone, lb_email, lb_password, lb_rep_password, lb_approve,
-             lb_lastname_er, lb_firstname_er, lb_patronymic_er, lb_phone_er, lb_email_er, lb_password_er, lb_rep_password_er, lb_conc_pass_er, lb_main_fields, lb_phone_exists, lb_email_exists;
+             lb_lastname_er, lb_firstname_er, lb_patronymic_er, lb_phone_er, lb_email_er, lb_password_er, lb_rep_password_er, lb_conc_pass_er, lb_main_fields, lb_reg_er;
         private ControlEntry en_lastname, en_firstname, en_patronymic, en_email, en_password, en_rep_password;
         private Frame fr_lastname, fr_firstname, fr_patronymic, fr_birthdate, fr_phone, fr_email, fr_password, fr_rep_password;
         private Button bt_next;
@@ -35,15 +34,25 @@ namespace YoungDevelopers
         private Regex 
             re_lastname = new Regex(@"^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$"),
             re_email = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"), 
-            re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$");
+            re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$");
 
         #endregion
         public RegistrationPage()
         {
             this.Title = "Регистрация пользователя";
-            layout = new StackLayout();
+            layout = new StackLayout()
+            {
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                Orientation = StackOrientation.Vertical
+            };
             scrollview = new ScrollView();
+            main = new StackLayout()
+            {
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                Orientation = StackOrientation.Vertical
+            };
             layout.Orientation = StackOrientation.Vertical;
+            scrollview.Orientation = ScrollOrientation.Vertical;
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
 
             #region Элементы страницы
@@ -77,6 +86,7 @@ namespace YoungDevelopers
 
             en_lastname = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder  = "Иванов",
@@ -131,6 +141,7 @@ namespace YoungDevelopers
 
             en_firstname = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "Иван",
@@ -185,6 +196,7 @@ namespace YoungDevelopers
 
             en_patronymic = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "Иванович",
@@ -239,14 +251,12 @@ namespace YoungDevelopers
 
             dp_birthdate = new DatePickerControl()
             {
+                Date = DateTime.Now,
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-5, -15, 0, -12),
                 TextColor = Color.Gray,
                 Format = "dd.MM.yyyy",
             };
-
-
-            dp_birthdate.DateSelected += OnDateSelected;
 
             fr_birthdate = new Frame
             {
@@ -276,6 +286,7 @@ namespace YoungDevelopers
 
             me_phone = new MaskedEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Mask = "+7 (XXX) XXX-XX-XX",
@@ -334,6 +345,7 @@ namespace YoungDevelopers
 
             en_email = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "ivanivanov@mail.ru",
@@ -389,6 +401,7 @@ namespace YoungDevelopers
 
             en_password = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "**********",
@@ -444,6 +457,7 @@ namespace YoungDevelopers
 
             en_rep_password = new ControlEntry()
             {
+                Text = "",
                 FontFamily = "Cascadia Code Light",
                 Margin = new Thickness(-10, -15, 0, -17.5),
                 Placeholder = "**********",
@@ -503,7 +517,7 @@ namespace YoungDevelopers
 
             cb_approve = new CheckBox()
             {
-                Color = Color.SpringGreen,
+                Color = Color.FromRgb(105,233,165),
                 Margin = new Thickness(10, 0, -5, 5),
             };
 
@@ -536,7 +550,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -552,54 +566,73 @@ namespace YoungDevelopers
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
                 Text = "Не заполнены обязательные поля",
-                Margin = new Thickness(15, -5, 0, -1),
+                Margin = new Thickness(15, -10, 0, 5),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,
             };
 
             layout.Children.Add(lb_main_fields);
 
-            // Пользователь с такой почтой уже зарегистрирован
-            lb_email_exists = new Label()
-            {
-                IsVisible = false,
-                FontFamily = "Cascadia Code Light",
-                Text = "Пользователь с такой почтой уже зарегистрирован",
-                Margin = new Thickness(15, -5, 0, -1),
-                VerticalOptions = LayoutOptions.Start,
-                TextColor = Color.Red,
-            };
-
-            layout.Children.Add(lb_email_exists);
-
-            // Пользователь с таким номером телефона уже зарегистрирован
-            lb_phone_exists = new Label()
-            {
-                IsVisible = false,
-                FontFamily = "Cascadia Code Light",
-                Text = "Пользователь с такой почтой уже зарегистрирован",
-                Margin = new Thickness(15, -5, 0, -1),
-                VerticalOptions = LayoutOptions.Start,
-                TextColor = Color.Red,
-            };
-
-            layout.Children.Add(lb_phone_exists);
-
             #endregion
-
+            
             scrollview.Content = layout;          
             scrollview.VerticalOptions = LayoutOptions.FillAndExpand;
-            this.Content = scrollview;
+            main.Children.Add(scrollview);
+            this.Content = main;
             InitializeComponent();
         }
 
         #region Обработка событий
 
+        public async void OnNextPressed(object sender, EventArgs e)
+        {
+            lb_main_fields.IsVisible = false;
+            if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Now.Date.ToString("dd.MM.yyyy") && en_lastname.Text == "" && en_firstname.Text == "" && en_patronymic.Text == "" && me_phone.Text == "" && en_email.Text == "" && en_password.Text == "" && en_rep_password.Text == "" && cb_approve.IsChecked == false)
+            {
+                return;
+
+            }
+            else
+            {
+                if (fr_lastname.BorderColor == Color.FromRgb(194, 85, 85) || fr_firstname.BorderColor == Color.FromRgb(194, 85, 85) || fr_patronymic.BorderColor == Color.FromRgb(194, 85, 85) || fr_birthdate.BorderColor == Color.FromRgb(194, 85, 85)
+                || fr_phone.BorderColor == Color.FromRgb(194, 85, 85) || fr_email.BorderColor == Color.FromRgb(194, 85, 85) || fr_password.BorderColor == Color.FromRgb(194, 85, 85)
+                || fr_rep_password.BorderColor == Color.FromRgb(194, 85, 85) || lb_conc_pass_er.IsVisible == true)
+                {
+                    return;
+                }
+                else
+                {
+                    if (en_firstname.Text == "" || me_phone.Text == "" || en_email.Text == "" || en_password.Text == "" || en_rep_password.Text == "" || cb_approve.IsChecked == false)
+                    {
+                        lb_main_fields.IsVisible = true;
+                        return;
+                    }
+                    sendreg = new SendRegistraion();
+                    sendreg.email = en_email.Text;
+                    sendreg.password = en_password.Text;
+                    sendreg.phone = me_phone.Text;
+                    sendreg.firstname = en_firstname.Text;
+                    sendreg.lastname = en_lastname.Text;
+                    sendreg.patronymic = en_patronymic.Text;
+                    if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Now.Date.ToString("dd.MM.yyyy"))
+                    {
+                        sendreg.birthdate = null;
+                    }
+                    else
+                    {
+                        sendreg.birthdate = dp_birthdate.Date;
+                    }
+
+                    await Navigation.PushAsync(new DogAddPage(sendreg));
+                }
+            }
+        }
+
         public void CheckRecField()
         {
             if (lb_main_fields.IsVisible == true)
             {
-                if (lb_conc_pass_er.IsVisible == false && fr_firstname.BorderColor == Color.White && fr_phone.BorderColor == Color.White && fr_email.BorderColor == Color.White && fr_password.BorderColor == Color.White && fr_rep_password.BorderColor == Color.White && cb_approve.IsChecked == true)
+                if (me_phone.Text != "" && en_firstname.Text != "" && en_email.Text != "" && en_password.Text != "" && en_rep_password.Text != "" && lb_conc_pass_er.IsVisible == false && fr_firstname.BorderColor == Color.White && fr_phone.BorderColor == Color.White && fr_email.BorderColor == Color.White && fr_password.BorderColor == Color.White && fr_rep_password.BorderColor == Color.White && cb_approve.IsChecked == true)
                 {
                     lb_main_fields.IsVisible = false;
                 }
@@ -622,7 +655,7 @@ namespace YoungDevelopers
 
         public void OnLastNameFocused(object sender, EventArgs e)
         {
-            fr_lastname.BorderColor = Color.SpringGreen;
+            fr_lastname.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnLastNameUnfocused(object sender, EventArgs e)
@@ -662,7 +695,7 @@ namespace YoungDevelopers
 
         public void OnFirstNameFocused(object sender, EventArgs e)
         {
-            fr_firstname.BorderColor = Color.SpringGreen;
+            fr_firstname.BorderColor = Color.FromRgb(105,233,165);
         }
         public void OnFirstNameUnfocused(object sender, EventArgs e)
         {
@@ -702,7 +735,7 @@ namespace YoungDevelopers
 
         public void OnPatronymicFocused(object sender, EventArgs e)
         {
-            fr_patronymic.BorderColor = Color.SpringGreen;
+            fr_patronymic.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnPatronymicUnfocused(object sender, EventArgs e)
@@ -742,7 +775,7 @@ namespace YoungDevelopers
 
         public void OnPhoneFocusedChanged(object sender, EventArgs e)
         {
-            fr_phone.BorderColor = Color.SpringGreen;
+            fr_phone.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnPhoneUnfocused(object sender, EventArgs e)
@@ -782,7 +815,7 @@ namespace YoungDevelopers
 
         public void OnEmailFocused(object sender, EventArgs e)
         {
-            fr_email.BorderColor = Color.SpringGreen;
+            fr_email.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnEmailUnfocused(object sender, EventArgs e)
@@ -831,7 +864,8 @@ namespace YoungDevelopers
 
         public void OnPasswordFocused(object sender, EventArgs e)
         {
-            fr_password.BorderColor = Color.SpringGreen;
+            fr_password.BorderColor = Color.FromRgb(105,233,165);
+            lb_conc_pass_er.IsVisible = false;
         }
 
         public void OnPasswordUnfocused(object sender, EventArgs e)
@@ -848,6 +882,8 @@ namespace YoungDevelopers
                     fr_password.BackgroundColor = Color.FromRgb(255, 187, 187);
                     en_password.BackgroundColor = Color.FromRgb(255, 187, 187);
                     en_password.TextColor = Color.FromRgb(194, 85, 85);
+                    this.IsVisible = false;
+                    this.IsVisible = true;
                 }
                 else if (en_rep_password.Text != en_password.Text && en_rep_password.Text != null && en_rep_password.Text != "")
                 {
@@ -863,6 +899,7 @@ namespace YoungDevelopers
                     CheckRecField();
                 }
             }
+            
         }
 
         public void OnRepPasswordTextChanged(object sender, EventArgs e)
@@ -884,7 +921,8 @@ namespace YoungDevelopers
 
         public void OnRepPasswordFocused(object sender, EventArgs e)
         {
-            fr_rep_password.BorderColor = Color.SpringGreen;
+            fr_rep_password.BorderColor = Color.FromRgb(105,233,165);
+            lb_conc_pass_er.IsVisible = false;
         }
 
         public void OnRepPasswordUnfocused(object sender, EventArgs e)
@@ -922,50 +960,6 @@ namespace YoungDevelopers
         {
             CheckRecField();
         }
-
-        public void OnDateSelected(object sender, EventArgs e)
-        {
-            hasDate = true;
-        }
-
-        public async void OnNextPressed(object sender, EventArgs e)
-        {
-            await Navigation.PushAsync(new DogAddPage());
-            if (fr_lastname.BackgroundColor == Color.FromRgb(194, 85, 85) || fr_firstname.BackgroundColor == Color.FromRgb(194, 85, 85) || fr_patronymic.BackgroundColor == Color.FromRgb(194, 85, 85) || fr_birthdate.BackgroundColor == Color.FromRgb(194, 85, 85)
-                || fr_phone.BackgroundColor == Color.FromRgb(194, 85, 85) || fr_email.BackgroundColor == Color.FromRgb(194, 85, 85) || fr_password.BackgroundColor == Color.FromRgb(194, 85, 85)
-                || fr_rep_password.BackgroundColor == Color.FromRgb(194, 85, 85) || lb_conc_pass_er.IsVisible == true || lb_main_fields.IsVisible == true)
-            {
-                lb_main_fields.IsVisible = true;
-            }
-            else if (en_lastname.Text == "" || en_lastname.Text == null || me_phone.Text == "" || me_phone.Text == null || en_email.Text == "" || en_email.Text == null ||
-                en_password.Text == "" || en_password.Text == null || en_rep_password.Text == "" || en_rep_password.Text == null || cb_approve.IsChecked == false)
-            {
-                lb_main_fields.IsVisible = true;
-            }
-            else
-            {
-                lb_main_fields.IsVisible = false;
-                sendreg = new SendRegistraion();
-                // if not empty
-                sendreg.lastname = en_lastname.Text;
-                sendreg.firstname = en_firstname.Text;
-                sendreg.patronymic = en_patronymic.Text;
-                if (hasDate)
-                {
-                    sendreg.birthdate = dp_birthdate.Date.ToString("dd.MM.yyyy");
-                }
-                sendreg.phone = "8" + me_phone.Text.Substring(4, 3) + me_phone.Text.Substring(9, 3) + me_phone.Text.Substring(13, 2) + me_phone.Text.Substring(16, 2);
-                sendreg.email = en_email.Text;
-                sendreg.password = en_password.Text;
-
-                await Navigation.PushModalAsync(new DogAddPage());
-
-                // Отправить Васе + ошибку сделать
-                //lb_phone_exists
-                //lb_email_exists
-            }
-        }
-
         #endregion
     }
 }

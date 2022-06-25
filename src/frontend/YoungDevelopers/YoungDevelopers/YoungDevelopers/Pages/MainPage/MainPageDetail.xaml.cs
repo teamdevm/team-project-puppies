@@ -1,9 +1,7 @@
 ﻿using DogsCompanion.Api.Client;
 using System;
-using System.Globalization;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using System.Net.Http;
 
 namespace YoungDevelopers
 {
@@ -17,7 +15,7 @@ namespace YoungDevelopers
         private Image im_doge;
         private int UserID;
         private ReadDog UserDog;
-        DogsCompanionClient dogsCompanionClient = (DogsCompanionClient)App.Current.Properties["dogsCompanionClient"];
+        DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
 
         #endregion
 
@@ -37,8 +35,7 @@ namespace YoungDevelopers
 
             im_doge = new Image
             {
-                Source = "ben" +
-                ".jpg",
+                Source = "pyops.png",
                 Margin = new Thickness(50, 20, 50, 0),
                 BackgroundColor = Color.FromRgb(242, 242, 242),
             };
@@ -48,7 +45,6 @@ namespace YoungDevelopers
             lb_nickname_val = new Label()
             {
                 HorizontalTextAlignment = TextAlignment.Center,
-                // Debug
                 Text = UserDog.Name,
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
@@ -133,8 +129,7 @@ namespace YoungDevelopers
             {
                 IsVisible = true,
                 HorizontalOptions = LayoutOptions.Start,
-                //Text = String.Format("dd.MM.yyyy", UserDog.BirthDate),
-                Text = DateTime.Parse(UserDog.BirthDate.ToString()).ToString("dd.MM.yyyy"),
+                Text = UserDog.BirthDate == null ? "" : DateTime.Parse(UserDog.BirthDate.ToString()).ToString("dd.MM.yyyy"),
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Дата рождения собаки",
                 TextColor = Color.Black,
@@ -151,7 +146,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -183,11 +178,39 @@ namespace YoungDevelopers
 
         private async void UpdateFieldsFromServer()
         {
-            ReadDog updateDoge = await dogsCompanionClient.GetDogsAsync();
-            lb_nickname_val.Text = updateDoge.Name;
-            lb_breed_val.Text = updateDoge.Breed;
-            lb_weight_val.Text = updateDoge.Weight.ToString();
-            lb_birthdate_val.Text = DateTime.Parse(updateDoge.BirthDate.ToString()).ToString("dd.MM.yyyy");
+            try
+            {
+                ReadDog updateDoge = await dogsCompanionClient.GetDogsAsync();
+                DataControl.SetReadDogItem(updateDoge);
+
+                lb_nickname_val.Text = updateDoge.Name;
+                lb_breed_val.Text = updateDoge.Breed;
+                lb_weight_val.Text = updateDoge.Weight.ToString();
+                lb_birthdate_val.Text = updateDoge.BirthDate == null ? "" : DateTime.Parse(updateDoge.BirthDate.ToString()).ToString("dd.MM.yyyy");
+
+                int downspacing = 0;
+                if (lb_birthdate_val.Text == "")
+                {
+                    lb_birthdate.IsVisible = false;
+                    lb_birthdate_val.IsVisible = false;
+                    downspacing += 70;
+                }
+                else
+                {
+                    lb_birthdate.IsVisible = true;
+                    lb_birthdate_val.IsVisible = true;
+                }
+                bt_edit.Margin = new Thickness(0, 240 + downspacing, 0, 5);
+            }
+            catch (Exception e)
+            {
+                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+            }
+        }
+
+        protected override void OnAppearing()
+        {
+            UpdateFieldsFromServer();
         }
     }
 }

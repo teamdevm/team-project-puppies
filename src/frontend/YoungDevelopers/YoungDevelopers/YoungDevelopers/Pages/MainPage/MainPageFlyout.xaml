@@ -10,7 +10,7 @@
               HasUnevenRows="true"
               ItemsSource="{Binding MenuItems}">
             <ListView.Header>
-                <Grid BackgroundColor="#FF00FF7F">
+                <Grid BackgroundColor="#69e9a5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="*"/>
@@ -26,7 +26,7 @@
               Grid.Column="1"
               Grid.Row="2"
               Text="{x:Static local:MainPageFlyout.AccountName}"
-              TextColor="#000000"
+              TextColor="#ffffff"
               FontFamily="Cascadia Code Light"
               Style="{DynamicResource SubtitleStyle}"
               FontSize="26"

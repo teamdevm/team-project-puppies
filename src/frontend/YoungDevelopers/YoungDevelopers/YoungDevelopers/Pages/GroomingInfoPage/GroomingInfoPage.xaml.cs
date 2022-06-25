@@ -1,10 +1,6 @@
 ﻿using DogsCompanion.Api.Client;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -15,18 +11,21 @@ namespace YoungDevelopers
     {
         #region Инициализация
         public int GroomingId;
+        private bool AllDay;
         private StackLayout layout;
         private ScrollView scrollview;
-        private Label lb_phone, lb_address, lb_site, lb_rating, lb_schedule;
+        private Label lb_phone, lb_address, lb_site, lb_rating, lb_schedule,
+            lb_monday, lb_tuesday, lb_wednesday, lb_thursday, lb_friday, lb_saturday, lb_sunday;
         private GroomerSalon GroomSalon;
         private Button bt_name;
-        DogsCompanionClient dogsCompanionClient = (DogsCompanionClient)App.Current.Properties["dogsCompanionClient"];
+        DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
 
         #endregion
         public GroomingInfoPage(int groomingId)
         {
             GroomingId = groomingId;
             GroomSalon = DataControl.GetGroomingItem(GroomingId);
+            AllDay = false;
             Title = "Информация о груминг-салоне";
             layout = new StackLayout();
             layout.Orientation = StackOrientation.Vertical;
@@ -34,13 +33,12 @@ namespace YoungDevelopers
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
 
             #region Элементы страницы
-
             bt_name = new CustomButton
             {
                 
                 Text = GroomSalon.Name,
                 FontAttributes = FontAttributes.Bold,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 8,
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
@@ -59,7 +57,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
                 FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(15, 20, 0, 20),
+                Margin = new Thickness(15, 20, 0, 15),
             };
 
             layout.Children.Add(lb_address);
@@ -72,7 +70,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
                 FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(15, 0, 0, 5),
+                Margin = new Thickness(15, 0, 0, 0),
             };
 
             layout.Children.Add(lb_phone);
@@ -85,7 +83,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
                 FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(15, 0, 0, 5),
+                Margin = new Thickness(15, 0, 0, 0),
             };
 
             layout.Children.Add(lb_site);
@@ -98,7 +96,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
                 FontAttributes = FontAttributes.Bold,
-                Margin = new Thickness(15, 0, 0, 5),
+                Margin = new Thickness(15, 0, 0, 10),
             };
 
             layout.Children.Add(lb_rating);
@@ -116,6 +114,96 @@ namespace YoungDevelopers
 
             layout.Children.Add(lb_schedule);
 
+            lb_monday = new Label()
+            {
+                HorizontalOptions = LayoutOptions.Start,
+                Text = DataControl.GetHoursString(AllDay, "ПН", GroomSalon.OpeningHours.First(s => s.Day == Day._1).Periods),
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontFamily = "Cascadia Code Light",
+                TextColor = Color.Black,
+                Margin = new Thickness(15, 0, 0, 0),
+                FontAttributes = FontAttributes.Bold,
+            };
+
+            layout.Children.Add(lb_monday);
+
+            lb_tuesday = new Label()
+            {
+                HorizontalOptions = LayoutOptions.Start,
+                Text = DataControl.GetHoursString(AllDay, "ВТ", GroomSalon.OpeningHours.First(s => s.Day == Day._2).Periods),
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontFamily = "Cascadia Code Light",
+                TextColor = Color.Black,
+                Margin = new Thickness(15, 0, 0, 0),
+                FontAttributes = FontAttributes.Bold,
+            };
+
+            layout.Children.Add(lb_tuesday);
+
+            lb_wednesday = new Label()
+            {
+                HorizontalOptions = LayoutOptions.Start,
+                Text = DataControl.GetHoursString(AllDay, "СР", GroomSalon.OpeningHours.First(s => s.Day == Day._3).Periods),
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontFamily = "Cascadia Code Light",
+                TextColor = Color.Black,
+                Margin = new Thickness(15, 0, 0, 0),
+                FontAttributes = FontAttributes.Bold,
+            };
+
+            layout.Children.Add(lb_wednesday);
+
+            lb_thursday = new Label()
+            {
+                HorizontalOptions = LayoutOptions.Start,
+                Text = DataControl.GetHoursString(AllDay, "ЧТ", GroomSalon.OpeningHours.First(s => s.Day == Day._4).Periods),
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontFamily = "Cascadia Code Light",
+                TextColor = Color.Black,
+                Margin = new Thickness(15, 0, 0, 0),
+                FontAttributes = FontAttributes.Bold,
+            };
+
+            layout.Children.Add(lb_thursday);
+
+            lb_friday = new Label()
+            {
+                HorizontalOptions = LayoutOptions.Start,
+                Text = DataControl.GetHoursString(AllDay, "ПТ", GroomSalon.OpeningHours.First(s => s.Day == Day._5).Periods),
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontFamily = "Cascadia Code Light",
+                TextColor = Color.Black,
+                Margin = new Thickness(15, 0, 0, 0),
+                FontAttributes = FontAttributes.Bold,
+            };
+
+            layout.Children.Add(lb_friday);
+
+            lb_saturday = new Label()
+            {
+                HorizontalOptions = LayoutOptions.Start,
+                Text = DataControl.GetHoursString(AllDay, "СБ", GroomSalon.OpeningHours.First(s => s.Day == Day._6).Periods),
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontFamily = "Cascadia Code Light",
+                TextColor = Color.Black,
+                FontAttributes = FontAttributes.Bold,
+                Margin = new Thickness(15, 0, 0, 0),
+            };
+
+            layout.Children.Add(lb_saturday);
+
+            lb_sunday = new Label()
+            {
+                HorizontalOptions = LayoutOptions.Start,
+                Text = DataControl.GetHoursString(AllDay, "ВС", GroomSalon.OpeningHours.First(s => s.Day == Day._7).Periods),
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontFamily = "Cascadia Code Light",
+                FontAttributes = FontAttributes.Bold,
+                TextColor = Color.Black,
+                Margin = new Thickness(15, 0, 0, 0),
+            };
+
+            layout.Children.Add(lb_sunday);
             #endregion
 
 
@@ -126,14 +214,31 @@ namespace YoungDevelopers
 
             UpdateFieldsFromServer();
         }
-        #region Обработка событий
-
-        #endregion
 
         public async void UpdateFieldsFromServer()
         {
-            GroomSalon = (GroomerSalon)await dogsCompanionClient.GetGroomerSalonAsync(GroomingId);
-            DataControl.SetGroomingItem(GroomSalon);
+            try
+            {
+                GroomSalon = (GroomerSalon)await dogsCompanionClient.GetGroomerSalonAsync(GroomingId);
+                DataControl.SetGroomingItem(GroomSalon);
+
+                bt_name.Text = GroomSalon.Name;
+                lb_address.Text = "Адрес: " + GroomSalon.Address;
+                lb_phone.Text = "Телефон: " + GroomSalon.PhoneNumber;
+                lb_site.Text = "Сайт: " + GroomSalon.Link;
+                lb_rating.Text = "Рейтинг: " + GroomSalon.Rating.ToString() + " ИЗ " + '5';
+                lb_monday.Text = DataControl.GetHoursString(AllDay, "ПН", GroomSalon.OpeningHours.First(s => s.Day == Day._1).Periods);
+                lb_tuesday.Text = DataControl.GetHoursString(AllDay, "ВТ", GroomSalon.OpeningHours.First(s => s.Day == Day._2).Periods);
+                lb_wednesday.Text = DataControl.GetHoursString(AllDay, "СР", GroomSalon.OpeningHours.First(s => s.Day == Day._3).Periods);
+                lb_thursday.Text = DataControl.GetHoursString(AllDay, "ЧТ", GroomSalon.OpeningHours.First(s => s.Day == Day._4).Periods);
+                lb_friday.Text = DataControl.GetHoursString(AllDay, "ПТ", GroomSalon.OpeningHours.First(s => s.Day == Day._5).Periods);
+                lb_saturday.Text = DataControl.GetHoursString(AllDay, "СБ", GroomSalon.OpeningHours.First(s => s.Day == Day._6).Periods);
+                lb_sunday.Text = DataControl.GetHoursString(AllDay, "ВС", GroomSalon.OpeningHours.First(s => s.Day == Day._7).Periods);
+            }
+            catch (Exception e)
+            {
+                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+            }
         }
     }
 }
