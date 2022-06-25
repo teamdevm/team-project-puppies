@@ -79,7 +79,7 @@ namespace YoungDevelopers
             ((Data)App.Current.Properties["storedata"]).Dogs = new List<ReadDog>();
             ((Data)App.Current.Properties["storedata"]).VetClinics = new List<VetClinic>();
             ((Data)App.Current.Properties["storedata"]).VetGroomerSalons = new List<GroomerSalon>();
-    }
+        }
 
         public static void SetCurrentUser(AuthResponse authResponse)
         {

@@ -493,7 +493,6 @@ namespace YoungDevelopers
             try
             {
                 UserDog = await dogsCompanionClient.GetDogsAsync();
-
                 en_nickname.Placeholder = UserDog.Name;
                 en_breed.Placeholder = UserDog.Breed;
                 en_weight.Placeholder = UserDog.Weight.ToString();
