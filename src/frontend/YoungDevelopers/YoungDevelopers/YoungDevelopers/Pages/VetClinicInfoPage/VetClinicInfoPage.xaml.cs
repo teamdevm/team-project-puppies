@@ -28,7 +28,7 @@ namespace YoungDevelopers
             VetClinicID = vetClinicID;
             vetClinic = DataControl.GetVetClinicItem(VetClinicID);
             AllDay = vetClinic.IsAllDay;
-            Title = "Информация о груминг-салоне";
+            Title = "Информация о ветклинике";
             layout = new StackLayout();
             layout.Orientation = StackOrientation.Vertical;
             layout.VerticalOptions = LayoutOptions.FillAndExpand;
