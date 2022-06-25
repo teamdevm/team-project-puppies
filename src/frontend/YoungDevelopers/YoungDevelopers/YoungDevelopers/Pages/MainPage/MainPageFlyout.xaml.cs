@@ -50,5 +50,16 @@ namespace YoungDevelopers
             }
             #endregion
         }
+
+        private async void UpdateFieldsFromServer()
+        {
+            user = DataControl.GetCurrentUserItem();
+            AccountName = user.FirstName;
+        }
+
+        protected override void OnAppearing()
+        {
+            UpdateFieldsFromServer();
+        }
     }
 }

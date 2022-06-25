@@ -7,6 +7,7 @@ using Xamarin.Forms.Xaml;
 using System.Net.Http;
 using YoungDevelopers.Client;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace YoungDevelopers
 {
@@ -28,8 +29,6 @@ namespace YoungDevelopers
         private ControlEntry en_login, en_password;
         private Button bt_login, bt_register;
         private Frame fr_login, fr_pass;
-        private VideoView video;
-        private Action startVideo;
         private Regex re_email = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
         private SendAuth sendauth;
         private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
@@ -278,12 +277,27 @@ namespace YoungDevelopers
                     await tokenController.SetAccessTokenAsync(authResponse.AccessToken);
                     ReadDog addDog = await dogsCompanionClient.GetDogsAsync();
 
+                    var userInfo = new UserInfo
+                    {
+                        Id = authResponse.Id,
+                        Email = authResponse.Email,
+                        PhoneNumber = authResponse.PhoneNumber,
+                        FirstName = authResponse.FirstName,
+                        LastName = authResponse.LastName,
+                        MiddleName = authResponse.MiddleName,
+                        BirthDate = authResponse.BirthDate,
+                    };
+
                     // Загрузить информацию о пользователе
                     DataControl.SetAuthData(authResponse, addDog);
                     bt_login.IsVisible = true;
                     bt_register.IsVisible = true;
                     activityIndicator.IsVisible = false;
                     activityIndicator.IsRunning = false;
+
+                    DataControl.SetUserInfoItem(userInfo);
+
+                    //var test = ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == userInfo.Id);
 
                     // Переход на главную страницу
                     App.Current.MainPage = new MainPage();

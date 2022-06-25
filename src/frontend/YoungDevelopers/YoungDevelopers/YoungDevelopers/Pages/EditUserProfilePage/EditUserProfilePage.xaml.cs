@@ -542,6 +542,14 @@ namespace YoungDevelopers
                     try
                     {
                         await dogsCompanionClient.UpdateUserAsync(updateUser);
+
+                        var userInfo = DataControl.GetCurrentUserItem();
+                        userInfo.FirstName = updateUser.FirstName;
+                        userInfo.LastName = updateUser.LastName;
+                        userInfo.MiddleName = updateUser.MiddleName;
+                        userInfo.BirthDate = updateUser.BirthDate;
+                        DataControl.SetUserInfoItem(userInfo);
+
                         await Navigation.PopAsync();
                     }
                     catch (ApiException apiExc)
