@@ -28,6 +28,8 @@ namespace YoungDevelopers
         private ControlEntry en_login, en_password;
         private Button bt_login, bt_register;
         private Frame fr_login, fr_pass;
+        private VideoView video;
+        private Action startVideo;
         private Regex re_email = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
         private SendAuth sendauth;
         private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
@@ -59,6 +61,14 @@ namespace YoungDevelopers
             };
 
             layout.Children.Add(im_pug);
+
+            //video = new VideoView
+            //{
+            //    Source = "ben.mp4",
+            //    ShowController = true,
+            //    Margin = new Thickness(50, 50, 50, 0),
+            //};
+            //layout.Children.Add(video);
 
             //Надпись Dog Assistant
             lb_dogass = new Label
@@ -270,7 +280,6 @@ namespace YoungDevelopers
 
                     // Загрузить информацию о пользователе
                     DataControl.SetAuthData(authResponse, addDog);
-
                     bt_login.IsVisible = true;
                     bt_register.IsVisible = true;
                     activityIndicator.IsVisible = false;
@@ -347,7 +356,6 @@ namespace YoungDevelopers
                     en_login.BackgroundColor = Color.White;
                     en_login.TextColor = Color.Black;
                     bt_register.Margin = new Thickness(0, 200, 0, 15);
-
                 }
             }
         }

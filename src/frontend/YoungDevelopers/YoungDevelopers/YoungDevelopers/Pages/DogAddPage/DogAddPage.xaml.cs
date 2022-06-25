@@ -376,11 +376,10 @@ namespace YoungDevelopers
                         lb_main_fields.IsVisible = true;
                         return;
                     }
-
                     bt_registrate.IsVisible = false;
                     activityIndicator.IsVisible = true;
                     activityIndicator.IsRunning = true;
-
+                    
                     UpdateDog createDog = new UpdateDog();
                     createDog.Name = en_nickname.Text;
                     createDog.Breed = en_breed.Text;
@@ -408,6 +407,7 @@ namespace YoungDevelopers
                     {
                         RegisterResponse response = await dogsCompanionClient.RegisterUserAsync(registerInfo);
 
+
                         // Установление ключа в httpclient
                         httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", response.AccessToken);
 
@@ -415,7 +415,6 @@ namespace YoungDevelopers
                         await tokenController.SetRefreshTokenAsync(response.RefreshToken);
                         await tokenController.SetAccessTokenAsync(response.AccessToken);
                                              
-
                         // Установить текущего пользователя АВАВАВА ОСУЖДАЮ
                         DataControl.SetNewCurrentUser(response);
 
@@ -423,10 +422,12 @@ namespace YoungDevelopers
                         activityIndicator.IsVisible = false;
                         activityIndicator.IsRunning = false;
 
+
                         App.Current.MainPage = new MainPage();
                     }
                     catch (ApiException apiExc)
                     {
+
                         bt_registrate.IsVisible = true;
                         activityIndicator.IsVisible = false;
                         activityIndicator.IsRunning = false;
@@ -439,6 +440,7 @@ namespace YoungDevelopers
                             await DisplayAlert("Ошибка", "Номер телефона уже используется", "OK");
                         }
                         else if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
+
                         {
                             lb_reg_er.Text = "Сервис недоступен";
                             lb_reg_er.IsVisible = true;
@@ -454,6 +456,7 @@ namespace YoungDevelopers
                         activityIndicator.IsVisible = false;
                         activityIndicator.IsRunning = false;
                         await DisplayAlert("Ошибка", ex.Message, "OK");
+
                     }
                 }             
             }

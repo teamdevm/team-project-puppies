@@ -2,6 +2,7 @@
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Text.RegularExpressions;
+using DogsCompanion.Api.Client;
 
 namespace YoungDevelopers
 {
@@ -960,6 +961,7 @@ namespace YoungDevelopers
         {
             CheckRecField();
         }
+        
         #endregion
     }
 }

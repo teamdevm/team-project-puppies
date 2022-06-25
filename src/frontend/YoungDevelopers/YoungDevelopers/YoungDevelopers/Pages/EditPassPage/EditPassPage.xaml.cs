@@ -343,7 +343,7 @@ namespace YoungDevelopers
                 }
             }
         }
-
+        
         public void OnPasswordTextChanged(object sender, EventArgs e)
         {
             lb_password_er.IsVisible = false;

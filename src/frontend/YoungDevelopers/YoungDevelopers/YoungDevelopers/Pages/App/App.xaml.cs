@@ -17,7 +17,6 @@ namespace YoungDevelopers
             InitializeComponent();
             DependencyService.Register<MockDataStore>();
             MainPage = new NavigationPage(new LoginPage());
-
         }
 
         private void CreateClient()
