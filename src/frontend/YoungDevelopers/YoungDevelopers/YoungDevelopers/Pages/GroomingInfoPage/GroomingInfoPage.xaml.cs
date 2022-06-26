@@ -114,7 +114,7 @@ namespace YoungDevelopers
             lb_rating = new Label()
             {
                 HorizontalOptions = LayoutOptions.Start,
-                Text = "Рейтинг: " + GroomSalon.Rating.ToString() + " ИЗ " + '5',
+                Text = "Рейтинг: " + (GroomSalon.Rating == 0 ? "нет оценок" : $"{GroomSalon.Rating} из 5"),
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
@@ -249,7 +249,7 @@ namespace YoungDevelopers
                 lb_address.Text = "Адрес: " + GroomSalon.Address;
                 lb_phone.Text = "Телефон: " + GroomSalon.PhoneNumber;
                 lb_site.Text = "Сайт: " + GroomSalon.Link;
-                lb_rating.Text = "Рейтинг: " + GroomSalon.Rating.ToString() + " ИЗ " + '5';
+                lb_rating.Text = "Рейтинг: " + (GroomSalon.Rating == 0 ? "нет оценок" : $"{GroomSalon.Rating} из 5");
                 lb_monday.Text = DataControl.GetHoursString(AllDay, "ПН", GroomSalon.OpeningHours.First(s => s.Day == Day._1).Periods);
                 lb_tuesday.Text = DataControl.GetHoursString(AllDay, "ВТ", GroomSalon.OpeningHours.First(s => s.Day == Day._2).Periods);
                 lb_wednesday.Text = DataControl.GetHoursString(AllDay, "СР", GroomSalon.OpeningHours.First(s => s.Day == Day._3).Periods);

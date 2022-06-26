@@ -390,7 +390,7 @@ namespace YoungDevelopers
                     }
                     else
                     {
-                        createDog.BirthDate = dp_birthdate.Date;
+                        createDog.BirthDate = DateTime.SpecifyKind(dp_birthdate.Date, DateTimeKind.Utc);
                     }
 
                     RegisterInfo registerInfo = new RegisterInfo();

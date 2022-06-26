@@ -341,7 +341,7 @@ namespace YoungDevelopers
                     }
                     else
                     {
-                        updateDog.BirthDate = new DateTimeOffset(dp_birthdate.Date);
+                        updateDog.BirthDate = DateTime.SpecifyKind(dp_birthdate.Date, DateTimeKind.Utc);
                     }
 
                     try

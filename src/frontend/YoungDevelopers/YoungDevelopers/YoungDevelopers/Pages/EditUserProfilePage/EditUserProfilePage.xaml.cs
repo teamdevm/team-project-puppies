@@ -536,7 +536,7 @@ namespace YoungDevelopers
                     }
                     else
                     {
-                        updateUser.BirthDate = dp_birthdate.Date;
+                        updateUser.BirthDate = DateTime.SpecifyKind(dp_birthdate.Date, DateTimeKind.Utc);
                     }
 
                     try

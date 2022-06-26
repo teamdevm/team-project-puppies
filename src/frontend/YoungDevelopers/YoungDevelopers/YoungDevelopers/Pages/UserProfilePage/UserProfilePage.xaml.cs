@@ -1,5 +1,6 @@
 ﻿using DogsCompanion.Api.Client;
 using System;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -239,7 +240,7 @@ namespace YoungDevelopers
             };
 
             layout.Children.Add(bt_logout);
-            bt_logout.Clicked += OnLogoutClicked;
+            bt_logout.Clicked += OnLogoutClickedAsync;
 
             #endregion
 
@@ -256,8 +257,20 @@ namespace YoungDevelopers
             await Navigation.PushAsync(new EditUserProfilePage());
         }
 
-        public void OnLogoutClicked(object sender, EventArgs e)
+        public async void OnLogoutClickedAsync(object sender, EventArgs e)
         {
+            try
+            {
+                var tokenController = DataControl.tokenController;
+                await tokenController.SetRefreshTokenAsync(string.Empty);
+                await tokenController.SetAccessTokenAsync(string.Empty);
+            }
+            catch (Exception)
+            {
+                return;
+            }
+            
+
             App.Current.MainPage = new NavigationPage(new LoginPage());
         }
 

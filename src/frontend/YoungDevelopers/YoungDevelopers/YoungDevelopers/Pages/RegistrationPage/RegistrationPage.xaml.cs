@@ -621,7 +621,7 @@ namespace YoungDevelopers
                     }
                     else
                     {
-                        sendreg.birthdate = dp_birthdate.Date;
+                        sendreg.birthdate = DateTime.SpecifyKind(dp_birthdate.Date, DateTimeKind.Utc);
                     }
 
                     await Navigation.PushAsync(new DogAddPage(sendreg));

@@ -130,7 +130,7 @@ namespace YoungDevelopers
             lb_rating = new Label()
             {
                 HorizontalOptions = LayoutOptions.Start,
-                Text = "Рейтинг: " + vetClinic.Rating.ToString() + " ИЗ " + '5',
+                Text = "Рейтинг: " + (vetClinic.Rating == 0 ? "нет оценок" : $"{vetClinic.Rating} из 5"),
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
@@ -265,7 +265,7 @@ namespace YoungDevelopers
                 lb_clockar.Text = "КРУГЛОСУТОЧНО " + DataControl.GetEmoji(vetClinic.IsAllDay);
                 lb_phone.Text = "Телефон: " + vetClinic.PhoneNumber;
                 lb_site.Text = "Сайт: " + vetClinic.Link;
-                lb_rating.Text = "Рейтинг: " + vetClinic.Rating.ToString() + " ИЗ " + '5';
+                lb_rating.Text = "Рейтинг: " + (vetClinic.Rating == 0 ? "нет оценок" : $"{vetClinic.Rating} из 5");
                 lb_monday.Text = DataControl.GetHoursString(AllDay, "ПН", vetClinic.OpeningHours.First(s => s.Day == Day._1).Periods);
                 lb_tuesday.Text = DataControl.GetHoursString(AllDay, "ВТ", vetClinic.OpeningHours.First(s => s.Day == Day._2).Periods);
                 lb_wednesday.Text = DataControl.GetHoursString(AllDay, "СР", vetClinic.OpeningHours.First(s => s.Day == Day._3).Periods);
