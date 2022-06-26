@@ -267,6 +267,7 @@ namespace YoungDevelopers
             }
             catch (Exception)
             {
+                await DisplayAlert("", "Непредвиденная ошибка", "OK");
                 return;
             }
             
@@ -327,9 +328,13 @@ namespace YoungDevelopers
 
                 lb_email_val.Margin = new Thickness(15, 0, 0, 165 + downspacing);
             }
+            catch (ApiException apiExc)
+            {
+                await DisplayAlert("", "Сервис недоступен", "OK");
+            }
             catch (Exception e)
             {
-                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+                await DisplayAlert("", "Непредвиденная ошибка", "OK");
             }
         }
 

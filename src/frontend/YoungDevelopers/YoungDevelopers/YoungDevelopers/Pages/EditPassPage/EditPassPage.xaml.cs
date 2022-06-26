@@ -1,4 +1,5 @@
 ﻿using DogsCompanion.Api.Client;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
@@ -284,20 +285,20 @@ namespace YoungDevelopers
                             await dogsCompanionClient.ChangePasswordAsync(changePass);
                             await Navigation.PopAsync();
                         }
-                        catch (ApiException ex)
+                        catch (ApiException apiExc)
                         {
-                            if (ex.StatusCode == 401)
+                            if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
                             {
-                                await DisplayAlert("Ошибка", "Неверный текущий пароль", "OK");
+                                await DisplayAlert("", "Неверный текущий пароль", "OK");
                             }
-                            else
+                            else if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
                             {
-                                await DisplayAlert("Ошибка", ex.Message, "OK");
+                                await DisplayAlert("", "Сервис недоступен", "OK");
                             }
                         }
                         catch (Exception ex)
                         {
-                            await DisplayAlert("Ошибка", ex.Message, "OK");
+                            await DisplayAlert("", "Непредвиденная ошибка", "OK");
                         }
                     }
                 }
@@ -470,9 +471,13 @@ namespace YoungDevelopers
             {
                 UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
             }
+            catch (ApiException apiExc)
+            {
+                await DisplayAlert("", "Сервис недоступен", "OK");
+            }
             catch (Exception e)
             {
-                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+                await DisplayAlert("", "Непредвиденная ошибка", "OK");
             }
         }
     }

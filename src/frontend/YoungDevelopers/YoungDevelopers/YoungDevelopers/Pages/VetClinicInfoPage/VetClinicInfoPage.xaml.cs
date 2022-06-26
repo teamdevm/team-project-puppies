@@ -274,9 +274,13 @@ namespace YoungDevelopers
                 lb_saturday.Text = DataControl.GetHoursString(AllDay, "СБ", vetClinic.OpeningHours.First(s => s.Day == Day._6).Periods);
                 lb_sunday.Text = DataControl.GetHoursString(AllDay, "ВС", vetClinic.OpeningHours.First(s => s.Day == Day._7).Periods);
             }
+            catch (ApiException apiExc)
+            {
+                await DisplayAlert("", "Сервис недоступен", "OK");
+            }
             catch (Exception e)
             {
-                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+                await DisplayAlert("", "Непредвиденная ошибка", "OK");
             }
         }
     }

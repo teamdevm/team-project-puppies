@@ -202,9 +202,13 @@ namespace YoungDevelopers
                 }
                 bt_edit.Margin = new Thickness(0, 240 + downspacing, 0, 5);
             }
+            catch (ApiException apiExc)
+            {
+                await DisplayAlert("", "Сервис недоступен", "OK");
+            }
             catch (Exception e)
             {
-                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+                await DisplayAlert("", "Непредвиденная ошибка", "OK");
             }
         }
 

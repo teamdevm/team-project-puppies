@@ -667,7 +667,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_lastname.Match(en_lastname.Text);
-                if (!match.Success)
+                if (!match.Success || en_lastname.Text.Length > 29)
                 {
                     fr_lastname.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_lastname_er.IsVisible = true;
@@ -706,7 +706,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_lastname.Match(en_firstname.Text);
-                if (!match.Success)
+                if (!match.Success || en_firstname.Text.Length > 29)
                 {
                     fr_firstname.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_firstname_er.IsVisible = true;
@@ -747,7 +747,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_lastname.Match(en_patronymic.Text);
-                if (!match.Success)
+                if (!match.Success || en_patronymic.Text.Length > 29)
                 {
                     fr_patronymic.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_patronymic_er.IsVisible = true;
@@ -827,7 +827,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_email.Match(en_email.Text);
-                if (!match.Success)
+                if (!match.Success || en_email.Text.Length > 320)
                 {
                     lb_email_er.IsVisible = true;
                     fr_email.BorderColor = Color.FromRgb(194, 85, 85);
