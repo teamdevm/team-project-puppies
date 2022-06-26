@@ -1,6 +1,7 @@
 ﻿using DogsCompanion.Api.Client;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -204,7 +205,7 @@ namespace YoungDevelopers
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Вес собаки должен быть от 1 до 200 кг",
+                Text = ErrorConstants.WeightError,
                 Margin = new Thickness(15, -5, 0, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,
@@ -255,7 +256,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.FromRgb(105,233,165),
+                BackgroundColor = Color.FromRgb(105, 233, 165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -264,7 +265,7 @@ namespace YoungDevelopers
 
             layout.Children.Add(bt_registrate);
             bt_registrate.Clicked += OnSaveClicked;
-                       
+
             lb_update_er = new Label()
             {
                 IsVisible = false,
@@ -296,10 +297,10 @@ namespace YoungDevelopers
             lb_update_er.IsVisible = false;
             if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.UtcNow.Date.ToString("dd.MM.yyyy") && en_breed.Text == "" && en_nickname.Text == "" && en_weight.Text == "")
             {
-                
+
                 return;
             }
-            else 
+            else
             {
                 if (fr_nickname.BorderColor == Color.FromRgb(194, 85, 85) || fr_breed.BorderColor == Color.FromRgb(194, 85, 85) || fr_weight.BorderColor == Color.FromRgb(194, 85, 85))
                 {
@@ -333,7 +334,11 @@ namespace YoungDevelopers
                     }
                     else
                     {
-                        updateDog.Weight = int.Parse(en_weight.Text);
+                        if (!int.TryParse(en_weight.Text, out int parsedWeight))
+                        {
+                            return;
+                        }
+                        updateDog.Weight = parsedWeight;
                     }
 
                     if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.UtcNow.Date.ToString("dd.MM.yyyy"))
@@ -370,7 +375,7 @@ namespace YoungDevelopers
 
         private void OnNicknameFocused(object sender, EventArgs e)
         {
-            fr_nickname.BorderColor = Color.FromRgb(105,233,165);
+            fr_nickname.BorderColor = Color.FromRgb(105, 233, 165);
         }
 
         private void OnNicknameUnfocused(object sender, EventArgs e)
@@ -410,7 +415,7 @@ namespace YoungDevelopers
 
         private void OnBreedFocused(object sender, EventArgs e)
         {
-            fr_breed.BorderColor = Color.FromRgb(105,233,165);
+            fr_breed.BorderColor = Color.FromRgb(105, 233, 165);
         }
 
         private void OnBreedUnfocused(object sender, EventArgs e)
@@ -450,7 +455,7 @@ namespace YoungDevelopers
 
         private void OnWeightFocused(object sender, EventArgs e)
         {
-            fr_weight.BorderColor = Color.FromRgb(105,233,165);
+            fr_weight.BorderColor = Color.FromRgb(105, 233, 165);
         }
 
         private void OnWeightUnfocused(object sender, EventArgs e)
@@ -460,7 +465,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_weight.Match(en_weight.Text);
-                if (!match.Success || int.Parse(en_weight.Text) < 1 || int.Parse(en_weight.Text) > 200)
+                if (!match.Success || int.TryParse(en_weight.Text, out int parsedWeight) || parsedWeight < 1 || parsedWeight > 200)
                 {
                     fr_weight.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_weight_er.IsVisible = true;
@@ -500,7 +505,7 @@ namespace YoungDevelopers
                 en_weight.Placeholder = UserDog.Weight.ToString();
                 dp_birthdate.Date = UserDog.BirthDate == null ? DateTime.UtcNow : DateTime.Parse(UserDog.BirthDate.ToString());
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
             }
