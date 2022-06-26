@@ -79,43 +79,43 @@ namespace DogsCompanion.Data
                     {
                         Day = Day.Mon,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Tue,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Wed,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Thu,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Fri,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Sat,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Sun,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     }
                 }
             },
@@ -173,43 +173,43 @@ namespace DogsCompanion.Data
                     {
                         Day = Day.Mon,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Tue,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Wed,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Thu,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Fri,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Sat,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Sun,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     }
                 }
             },
@@ -503,43 +503,43 @@ namespace DogsCompanion.Data
                     {
                         Day = Day.Mon,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Tue,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Wed,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Thu,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Fri,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Sat,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     },
                     new OpeningHours
                     {
                         Day = Day.Sun,
                         Periods = new List<Period>
-                        { new Period {Open = new DateTime().AddHours(0), Close = new DateTime().AddHours(0) } }
+                        { new Period {Open = new DateTime().AddHours(10), Close = new DateTime().AddHours(10) } }
                     }
                 }
             },

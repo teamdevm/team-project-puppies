@@ -39,7 +39,7 @@ namespace DogsCompanion.App.Controllers.Content
                 Rating = c.Rating,
                 IsAllDay = c.IsAllDay,
                 OpeningHours = c.OpeningHours
-            }).ToListAsync();
+            }).OrderBy(c => c.Id).ToListAsync();
 
             return Ok(clinics);
         }
