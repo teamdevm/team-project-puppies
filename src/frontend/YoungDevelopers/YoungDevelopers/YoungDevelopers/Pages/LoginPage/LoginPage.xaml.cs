@@ -362,7 +362,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_email.Match(en_login.Text);
-                if (!match.Success)
+                if (!match.Success || en_login.Text.Length > 29)
                 {
                     fr_login.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_login_error.IsVisible = true;

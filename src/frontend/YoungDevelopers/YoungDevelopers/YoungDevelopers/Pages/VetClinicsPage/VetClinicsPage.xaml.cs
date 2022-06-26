@@ -156,9 +156,13 @@ namespace YoungDevelopers
                 scrollview.Content = layout;
                 this.Content = scrollview;
             }
+            catch (ApiException apiExc)
+            {
+                await DisplayAlert("", "Сервис недоступен", "OK");
+            }
             catch (Exception e)
             {
-                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+                await DisplayAlert("", "Непредвиденная ошибка", "OK");
             }
         }
     }

@@ -363,11 +363,14 @@ namespace YoungDevelopers
                             lb_update_er.Text = "Сервис недоступен";
                             lb_update_er.IsVisible = true;
                         }
-                        await DisplayAlert("Error", apiExc.Message, "OK");
+                        else
+                        {
+                            await DisplayAlert("", "Введены некорректные данные", "OK");
+                        }
                     }
                     catch (Exception ex)
                     {
-                        await DisplayAlert("Error", ex.Message, "OK");
+                        await DisplayAlert("", "Непредвиденная ошибка", "OK");
                     }
                 }
             }
@@ -385,7 +388,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_nickname.Match(en_nickname.Text);
-                if (!match.Success)
+                if (!match.Success || en_nickname.Text.Length > 29)
                 {
                     fr_nickname.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_nickname_er.IsVisible = true;
@@ -425,7 +428,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_nickname.Match(en_breed.Text);
-                if (!match.Success)
+                if (!match.Success || en_breed.Text.Length > 29)
                 {
                     fr_breed.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_breed_er.IsVisible = true;

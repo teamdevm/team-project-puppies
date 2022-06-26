@@ -1,4 +1,5 @@
 ﻿using DogsCompanion.Api.Client;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
@@ -232,7 +233,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_email.Match(en_email.Text);
-                if (!match.Success)
+                if (!match.Success || en_email.Text.Length > 320)
                 {
                     lb_email_er.IsVisible = true;
                     fr_email.BorderColor = Color.FromRgb(194, 85, 85);
@@ -324,17 +325,24 @@ namespace YoungDevelopers
                             DataControl.SetUserInfoItem(await dogsCompanionClient.GetUserInfoAsync());
                             await Navigation.PopAsync();
                         }
-                        catch (ApiException ex)
+                        catch (ApiException apiExc)
                         {
-                            if (ex.StatusCode == 409)
+                            if (apiExc.StatusCode == StatusCodes.Status409Conflict)
                             {
-                                await DisplayAlert("Ошибка", "Почта уже используется", "OK");
+                                await DisplayAlert("", "Почта уже используется", "OK");
                             }
-                            else
+                            else if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
                             {
-                                await DisplayAlert("Ошибка", ex.Message, "OK");
+                                await DisplayAlert("", "Неверный пароль", "OK");
                             }
-
+                            else if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
+                            {
+                                await DisplayAlert("", "Сервис недоступен", "OK");
+                            }
+                        }
+                        catch
+                        {
+                            await DisplayAlert("", "Непредвиденная ошибка", "OK");
                         }
                     }
                 }
@@ -352,9 +360,13 @@ namespace YoungDevelopers
 
                 en_email.Placeholder = updateUser.Email.ToString();
             }
+            catch (ApiException apiExc)
+            {
+                await DisplayAlert("", "Сервис недоступен", "OK");
+            }
             catch (Exception e)
             {
-                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+                await DisplayAlert("", "Непредвиденная ошибка", "OK");
             }
         }
     }

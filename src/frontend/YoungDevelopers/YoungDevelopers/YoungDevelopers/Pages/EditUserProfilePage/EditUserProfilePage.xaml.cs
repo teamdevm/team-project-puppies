@@ -383,7 +383,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_lastname.Match(en_lastname.Text);
-                if (!match.Success)
+                if (!match.Success || en_lastname.Text.Length > 29)
                 {
                     fr_lastname.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_lastname_er.IsVisible = true;
@@ -423,7 +423,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_lastname.Match(en_firstname.Text);
-                if (!match.Success)
+                if (!match.Success || en_firstname.Text.Length > 29)
                 {
                     fr_firstname.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_firstname_er.IsVisible = true;
@@ -464,7 +464,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_lastname.Match(en_patronymic.Text);
-                if (!match.Success)
+                if (!match.Success || en_patronymic.Text.Length > 29)
                 {
                     fr_patronymic.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_patronymic_er.IsVisible = true;
@@ -491,7 +491,18 @@ namespace YoungDevelopers
         public async void OnSaveClicked(object sender, EventArgs e)
         {
             lb_update_er.IsVisible = false;
-            if ((dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Now.Date.ToString("dd.MM.yyyy") || dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Parse(user.BirthDate.ToString()).ToString("dd.MM.yyyy")) && en_firstname.Text == "" && en_lastname.Text == "" && en_patronymic.Text == "")
+
+            string convertedBirthDate = null;
+            if (user.BirthDate != null)
+            {
+                convertedBirthDate = DateTime.Parse(user.BirthDate.ToString()).ToString("dd.MM.yyyy");
+            }
+
+            if (
+                (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Now.Date.ToString("dd.MM.yyyy") 
+                    || dp_birthdate.Date.ToString("dd.MM.yyyy") == convertedBirthDate) 
+                
+                && en_firstname.Text == "" && en_lastname.Text == "" && en_patronymic.Text == "")
             {
                 return;
             }
@@ -563,7 +574,7 @@ namespace YoungDevelopers
                     }
                     catch (Exception ex)
                     {
-                        await DisplayAlert("Error", ex.Message, "OK");
+                        await DisplayAlert("", "Непредвиденная ошибка", "OK");
                     }
                 }
             } 
@@ -597,9 +608,13 @@ namespace YoungDevelopers
                 en_patronymic.Placeholder = updateUser.MiddleName.ToString();
                 dp_birthdate.Date = updateUser.BirthDate == null ? DateTime.Now : DateTime.Parse(user.BirthDate.ToString());
             }
+            catch (ApiException apiExc)
+            {
+                await DisplayAlert("", "Сервис недоступен", "OK");
+            }
             catch (Exception e)
             {
-                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+                await DisplayAlert("", "Непредвиденная ошибка", "OK");
             }
         }
     }
