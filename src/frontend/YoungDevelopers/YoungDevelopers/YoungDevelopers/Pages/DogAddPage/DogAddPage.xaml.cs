@@ -230,7 +230,7 @@ namespace YoungDevelopers
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Вес собаки должен быть от 1 до 200 кг",
+                Text = ErrorConstants.WeightError,
                 Margin = new Thickness(15, -5, 0, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,
@@ -573,7 +573,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_weight.Match(en_weight.Text);
-                if (!match.Success || int.Parse(en_weight.Text) < 1 || int.Parse(en_weight.Text) > 200)
+                if (!match.Success || int.TryParse(en_weight.Text, out int parsedWeight) || parsedWeight < 1 || parsedWeight > 200)
                 {
                     fr_weight.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_weight_er.IsVisible = true;
@@ -634,7 +634,12 @@ namespace YoungDevelopers
 
                 if (fr_weight.BorderColor != Color.FromRgb(194, 85, 85))
                 {
-                    savedoge.Weight = en_weight.Text == "" ? -1 : int.Parse(en_weight.Text);
+                    if (!int.TryParse(en_weight.Text, out int parsedWeight))
+                    {
+                        return;
+                    }
+
+                    savedoge.Weight = en_weight.Text == "" ? -1 : parsedWeight;
                 }
                 else
                 {
