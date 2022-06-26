@@ -28,7 +28,7 @@ namespace DogsCompanion.App.Controllers.Content
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<GroomerSalon>>> GetGroomerSalons()
         {
-            var salons = await _context.GroomerSalons.ToListAsync();
+            var salons = await _context.GroomerSalons.OrderBy(g => g.Id).ToListAsync();
             return Ok(salons);
         }
 

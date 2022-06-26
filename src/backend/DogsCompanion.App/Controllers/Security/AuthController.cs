@@ -36,6 +36,8 @@ namespace DogsCompanion.App.Controllers.Security
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<AuthResponse>> Authenticate([FromBody] AuthInfo authInfo)
         {
+            authInfo.Email = authInfo.Email.ToLower();
+
             var user = await _context.Users.Where(u => u.Email == authInfo.Email).FirstOrDefaultAsync();
 
             if (user == null)

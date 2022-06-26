@@ -42,6 +42,8 @@ namespace DogsCompanion.App.Controllers
         {
             var registerResponse = new RegisterResponse();
 
+            registerInfo.Email = registerInfo.Email.ToLower();
+
             registerResponse.IsEmailInUse = await _context.Users.AnyAsync(u => u.Email == registerInfo.Email);
             registerResponse.IsPhoneInUse = await _context.Users.AnyAsync(u => u.PhoneNumber == registerInfo.PhoneNumber);
 
