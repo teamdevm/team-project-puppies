@@ -465,7 +465,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_weight.Match(en_weight.Text);
-                if (!match.Success || int.TryParse(en_weight.Text, out int parsedWeight) || parsedWeight < 1 || parsedWeight > 200)
+                if (!match.Success || !int.TryParse(en_weight.Text, out int parsedWeight) || parsedWeight < 1 || parsedWeight > 200)
                 {
                     fr_weight.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_weight_er.IsVisible = true;
