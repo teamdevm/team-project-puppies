@@ -39,7 +39,7 @@ namespace YoungDevelopers
                     ItemId = groomings[0].Id,
                     Text = '\n' + "   " + groomings[0].Name + "\n\n   " + groomings[0].Address + '\n',
                     FontAttributes = FontAttributes.Bold,
-                    BackgroundColor = Color.SpringGreen,
+                    BackgroundColor = Color.FromRgb(105,233,165),
                     CornerRadius = 8,
                     HorizontalTextAlignment = TextAlignment.Start,
                     FontFamily = "Cascadia Code Light",
@@ -62,7 +62,7 @@ namespace YoungDevelopers
                         ItemId = groomings[i].Id,
                         Text = '\n' + "   " + groomings[i].Name + "\n\n   " + groomings[i].Address + '\n',
                         FontAttributes = FontAttributes.Bold,
-                        BackgroundColor = Color.SpringGreen,
+                        BackgroundColor = Color.FromRgb(105,233,165),
                         CornerRadius = 8,
                         HorizontalTextAlignment = TextAlignment.Start,
                         FontFamily = "Cascadia Code Light",
@@ -92,7 +92,6 @@ namespace YoungDevelopers
         public async void OnGroomingPressed(object sender, EventArgs e)
         {
             await Navigation.PushAsync(new GroomingInfoPage(((CustomButton)sender).ItemId));
-            //DisplayAlert("Error", sender., "OK");
         }
 
 
@@ -100,57 +99,65 @@ namespace YoungDevelopers
 
         private async void UpdateFieldsFromServer()
         {
-            layout = new StackLayout();
-            groomings = (List<GroomerSalon>)await dogsCompanionClient.GetGroomerSalonsAsync();
-            ((Data)App.Current.Properties["storedata"]).VetGroomerSalons = groomings;
-
-            if (groomings.Count > 0)
+            try
             {
-                Buttons.Add(new CustomButton
-                {
-                    ItemId = groomings[0].Id,
-                    Text = '\n' + "   " + groomings[0].Name + "\n\n   " + groomings[0].Address + '\n',
-                    FontAttributes = FontAttributes.Bold,
-                    BackgroundColor = Color.SpringGreen,
-                    CornerRadius = 8,
-                    HorizontalTextAlignment = TextAlignment.Start,
-                    FontFamily = "Cascadia Code Light",
-                    TextColor = Color.White,
-                    HorizontalOptions = LayoutOptions.Center,
-                    WidthRequest = 370,
-                    Margin = new Thickness(0, 20, 0, 10),
-                });
+                layout = new StackLayout();
+                Buttons = new List<CustomButton>();
+                groomings = (List<GroomerSalon>)await dogsCompanionClient.GetGroomerSalonsAsync();
+                ((Data)App.Current.Properties["storedata"]).VetGroomerSalons = groomings;
 
-                Buttons[0].Clicked += OnGroomingPressed;
-                layout.Children.Add(Buttons[0]);
-            }
-
-            if (groomings.Count > 1)
-            {
-                for (int i = 1; i < groomings.Count; i++)
+                if (groomings.Count > 0)
                 {
                     Buttons.Add(new CustomButton
                     {
-                        ItemId = groomings[i].Id,
-                        Text = '\n' + "   " + groomings[i].Name + "\n\n   " + groomings[i].Address + '\n',
+                        ItemId = groomings[0].Id,
+                        Text = '\n' + "   " + groomings[0].Name + "\n\n   " + groomings[0].Address + '\n',
                         FontAttributes = FontAttributes.Bold,
-                        BackgroundColor = Color.SpringGreen,
+                        BackgroundColor = Color.FromRgb(105, 233, 165),
                         CornerRadius = 8,
                         HorizontalTextAlignment = TextAlignment.Start,
                         FontFamily = "Cascadia Code Light",
                         TextColor = Color.White,
                         HorizontalOptions = LayoutOptions.Center,
                         WidthRequest = 370,
-                        Margin = new Thickness(0, 0, 0, 10),
+                        Margin = new Thickness(0, 20, 0, 10),
                     });
 
-                    Buttons[i].Clicked += OnGroomingPressed;
-                    layout.Children.Add(Buttons[i]);
+                    Buttons[0].Clicked += OnGroomingPressed;
+                    layout.Children.Add(Buttons[0]);
                 }
+
+                if (groomings.Count > 1)
+                {
+                    for (int i = 1; i < groomings.Count; i++)
+                    {
+                        Buttons.Add(new CustomButton
+                        {
+                            ItemId = groomings[i].Id,
+                            Text = '\n' + "   " + groomings[i].Name + "\n\n   " + groomings[i].Address + '\n',
+                            FontAttributes = FontAttributes.Bold,
+                            BackgroundColor = Color.FromRgb(105, 233, 165),
+                            CornerRadius = 8,
+                            HorizontalTextAlignment = TextAlignment.Start,
+                            FontFamily = "Cascadia Code Light",
+                            TextColor = Color.White,
+                            HorizontalOptions = LayoutOptions.Center,
+                            WidthRequest = 370,
+                            Margin = new Thickness(0, 0, 0, 10),
+                        });
+
+                        Buttons[i].Clicked += OnGroomingPressed;
+                        layout.Children.Add(Buttons[i]);
+                    }
+                }
+                scrollview = new ScrollView();
+                scrollview.Content = layout;
+                this.Content = scrollview;
             }
-            scrollview = new ScrollView();
-            scrollview.Content = layout;
-            this.Content = scrollview;
+            catch (Exception e)
+            {
+                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+            }
         }
 
         public async void ErrorAlert(string a)

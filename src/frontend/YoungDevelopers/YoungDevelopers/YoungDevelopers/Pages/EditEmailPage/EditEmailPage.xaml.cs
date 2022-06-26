@@ -1,10 +1,9 @@
 ﻿using DogsCompanion.Api.Client;
-using Microsoft.AspNetCore.Http;
 using System;
 using System.Text.RegularExpressions;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -20,8 +19,8 @@ namespace YoungDevelopers
         private Button bt_save;
         private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
         private Regex
-            re_email = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"),
-            re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$");
+            re_email = new Regex(RegexConstants.Email),
+            re_password = new Regex(RegexConstants.Password);
         #endregion
         public EditEmailPage()
         {
@@ -138,7 +137,7 @@ namespace YoungDevelopers
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Пароль должен содержать хотя бы одну цифру, латинскую букву в нижнем регистре, латинскую букву в верхнем регистре и спецсимвол",
+                Text = ErrorConstants.PasswordRequirements,
                 Margin = new Thickness(15, -5, 0, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,
@@ -155,7 +154,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -223,7 +222,7 @@ namespace YoungDevelopers
 
         public void OnEmailFocused(object sender, EventArgs e)
         {
-            fr_email.BorderColor = Color.SpringGreen;
+            fr_email.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnEmailUnfocused(object sender, EventArgs e)
@@ -264,7 +263,7 @@ namespace YoungDevelopers
 
         public void OnPasswordFocused(object sender, EventArgs e)
         {
-            fr_password.BorderColor = Color.SpringGreen;
+            fr_password.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnPasswordUnfocused(object sender, EventArgs e)
@@ -296,9 +295,6 @@ namespace YoungDevelopers
 
         public async void OnSaveClicked(object sender, EventArgs e)
         {
-            //lb_email_exists и еще кучу всегоs
-            //await Navigation.PopAsync();
-
             lb_main_fields.IsVisible = false;
             if (en_email.Text == "" && en_password.Text == "")
             {
@@ -325,12 +321,12 @@ namespace YoungDevelopers
                         try
                         {
                             await dogsCompanionClient.ChangeEmailAsync(changeEmail);
+                            DataControl.SetUserInfoItem(await dogsCompanionClient.GetUserInfoAsync());
                             await Navigation.PopAsync();
                         }
                         catch (ApiException ex)
                         {
-                            // ПОФИКСИТЬ
-                            if (ex.Response == "Email already in use")
+                            if (ex.StatusCode == 409)
                             {
                                 await DisplayAlert("Ошибка", "Почта уже используется", "OK");
                             }
@@ -350,9 +346,16 @@ namespace YoungDevelopers
 
         public async void UpdateFieldsFromServer()
         {
-            UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
+            try
+            {
+                UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
 
-            en_email.Placeholder = updateUser.Email.ToString();
+                en_email.Placeholder = updateUser.Email.ToString();
+            }
+            catch (Exception e)
+            {
+                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+            }
         }
     }
 }

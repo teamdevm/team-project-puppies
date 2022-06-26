@@ -1,14 +1,10 @@
 ﻿using DogsCompanion.Api.Client;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -20,20 +16,20 @@ namespace YoungDevelopers
         private UserInfo user;
         private ScrollView scrollview;
         private StackLayout layout;
-        private Label lb_musthave, lb_lastname, lb_firstname, lb_patronymic, lb_birthdate, lb_lastname_er, lb_firstname_er, lb_patronymic_er, lb_conc_pass_er, lb_main_fields, lb_update_er;
+        private Label lb_lastname, lb_firstname, lb_patronymic, lb_birthdate, lb_lastname_er, lb_firstname_er, lb_patronymic_er, lb_conc_pass_er, lb_main_fields, lb_update_er;
         private ControlEntry en_lastname, en_firstname, en_patronymic;
         private Frame fr_lastname, fr_firstname, fr_patronymic, fr_birthdate;
         private Button bt_save, bt_editemail, bt_editphone, bt_editpass;
         private DatePickerControl dp_birthdate;
         DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
         private Regex
-            re_lastname = new Regex(@"^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$");
+            re_lastname = new Regex(RegexConstants.LastName);
 
         #endregion
 
         public EditUserProfilePage()
         {
-            Title = "Редактирование профиля пользователя";
+            Title = "Редактирование профиля";
             layout = new StackLayout();
             scrollview = new ScrollView();
             layout.Orientation = StackOrientation.Vertical;
@@ -252,7 +248,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -294,7 +290,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -311,7 +307,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -328,7 +324,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -377,7 +373,7 @@ namespace YoungDevelopers
 
         public void OnLastNameFocused(object sender, EventArgs e)
         {
-            fr_lastname.BorderColor = Color.SpringGreen;
+            fr_lastname.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnLastNameUnfocused(object sender, EventArgs e)
@@ -418,7 +414,7 @@ namespace YoungDevelopers
 
         public void OnFirstNameFocused(object sender, EventArgs e)
         {
-            fr_firstname.BorderColor = Color.SpringGreen;
+            fr_firstname.BorderColor = Color.FromRgb(105,233,165);
         }
         public void OnFirstNameUnfocused(object sender, EventArgs e)
         {
@@ -458,7 +454,7 @@ namespace YoungDevelopers
 
         public void OnPatronymicFocused(object sender, EventArgs e)
         {
-            fr_patronymic.BorderColor = Color.SpringGreen;
+            fr_patronymic.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnPatronymicUnfocused(object sender, EventArgs e)
@@ -491,7 +487,7 @@ namespace YoungDevelopers
         {
             CheckRecField();
         }
-        //await DisplayAlert("Error", "cock", "OK");
+        
         public async void OnSaveClicked(object sender, EventArgs e)
         {
             lb_update_er.IsVisible = false;
@@ -541,12 +537,20 @@ namespace YoungDevelopers
                     }
                     else
                     {
-                        updateUser.BirthDate = dp_birthdate.Date;
+                        updateUser.BirthDate = DateTime.SpecifyKind(dp_birthdate.Date, DateTimeKind.Utc);
                     }
 
                     try
                     {
                         await dogsCompanionClient.UpdateUserAsync(updateUser);
+
+                        var userInfo = DataControl.GetCurrentUserItem();
+                        userInfo.FirstName = updateUser.FirstName;
+                        userInfo.LastName = updateUser.LastName;
+                        userInfo.MiddleName = updateUser.MiddleName;
+                        userInfo.BirthDate = updateUser.BirthDate;
+                        DataControl.SetUserInfoItem(userInfo);
+
                         await Navigation.PopAsync();
                     }
                     catch (ApiException apiExc)
@@ -584,12 +588,19 @@ namespace YoungDevelopers
 
         public async void UpdateFieldsFromServer()
         {
-            UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
+            try
+            {
+                UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
 
-            en_lastname.Placeholder = updateUser.LastName.ToString();
-            en_firstname.Placeholder = updateUser.FirstName;
-            en_patronymic.Placeholder = updateUser.MiddleName.ToString();
-            dp_birthdate.Date = updateUser.BirthDate == null ? DateTime.Now : DateTime.Parse(user.BirthDate.ToString());
+                en_lastname.Placeholder = updateUser.LastName.ToString();
+                en_firstname.Placeholder = updateUser.FirstName;
+                en_patronymic.Placeholder = updateUser.MiddleName.ToString();
+                dp_birthdate.Date = updateUser.BirthDate == null ? DateTime.Now : DateTime.Parse(user.BirthDate.ToString());
+            }
+            catch (Exception e)
+            {
+                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+            }
         }
     }
 }

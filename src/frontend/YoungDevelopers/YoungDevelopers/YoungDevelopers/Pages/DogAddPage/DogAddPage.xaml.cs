@@ -2,11 +2,11 @@
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Text.RegularExpressions;
-using System.Linq;
 using DogsCompanion.Api.Client;
 using System.Net.Http;
 using YoungDevelopers.Client;
 using Microsoft.AspNetCore.Http;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -15,27 +15,25 @@ namespace YoungDevelopers
     public partial class DogAddPage : ContentPage
     {
         #region Инициализация 
-        private bool hasDate = false;
+        private UpdateDog savedoge;
+        private ActivityIndicator activityIndicator;
         private StackLayout main, layout;
         private ScrollView scrollview;
-        private Image im_doge;
         private Frame fr_nickname, fr_breed, fr_weight, fr_birthdate;
         private ControlEntry en_nickname, en_breed, en_weight;
         private DatePickerControl dp_birthdate;
         private Label lb_musthave, lb_nickname, lb_breed, lb_weight, lb_birthdate, lb_nickname_er, lb_breed_er, lb_weight_er,
             lb_main_fields, lb_reg_er;
-        private Button bt_registrate, bt_upload_doge;
+        private Button bt_registrate;
         private SendRegistraion userInfo;
         private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
         private HttpClient httpClient = DataControl.httpClient;
         private TokenController tokenController = DataControl.tokenController;
         private Regex
-            re_nickname = new Regex(@"^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$"),
-            re_weight = new Regex("[+-]?([0-9]*[.])?[0-9]+");
-
+            re_nickname = new Regex(RegexConstants.DogName),
+            re_weight = new Regex(RegexConstants.Weight);
         #endregion
 
-        //SendRegistraion RegFields
         public DogAddPage(SendRegistraion userInfo_input)
         {
             this.Title = "Регистрация собаки";
@@ -56,33 +54,6 @@ namespace YoungDevelopers
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
 
             #region Элементы страницы
-
-            // Шаблон для добавления изображения собаки
-            im_doge = new Image
-            {
-                Source = "ben" +
-                ".jpg",
-                Margin = new Thickness(50, 20, 50, 0),
-                BackgroundColor = Color.FromRgb(242, 242, 242),
-            };
-
-            layout.Children.Add(im_doge);
-
-            // Кнопка добавить изображения
-            bt_upload_doge = new Button
-            {
-                Text = "Загрузить",
-                FontAttributes = FontAttributes.Bold,
-                FontFamily = "Cascadia Code Light",
-                TextColor = Color.White,
-                HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
-                CornerRadius = 10,
-                WidthRequest = 150
-            };
-            bt_upload_doge.Clicked += OnUploadClicked;
-
-            layout.Children.Add(bt_upload_doge);
 
             // Label обязательные поля
             lb_musthave = new Label()
@@ -259,7 +230,7 @@ namespace YoungDevelopers
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Неправильный формат веса собаки",
+                Text = "Вес собаки должен быть от 1 до 200 кг",
                 Margin = new Thickness(15, -5, 0, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,
@@ -289,8 +260,6 @@ namespace YoungDevelopers
                 Format = "dd.MM.yyyy",
             };
 
-            dp_birthdate.DateSelected += OnDateSelected;
-
             fr_birthdate = new Frame
             {
                 Content = dp_birthdate,
@@ -302,10 +271,22 @@ namespace YoungDevelopers
                 HasShadow = true,
             };
 
+            dp_birthdate.Unfocused += OnDateUnfocused;
+
             layout.Children.Add(fr_birthdate);
 
-            // Кнопка регистрация
+            activityIndicator = new ActivityIndicator
+            {
+                IsVisible = false,
+                IsRunning = false,
+                VerticalOptions = LayoutOptions.Center,
+                HorizontalOptions = LayoutOptions.Center,
+                Color = Color.FromRgb(105, 233, 165)
+            };
 
+            layout.Children.Add(activityIndicator);
+
+            // Кнопка регистрация
             bt_registrate = new Button()
             {
                 Text = "Создать аккаунт",
@@ -313,11 +294,11 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105, 233, 165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
-                Margin = new Thickness(0, 15, 0, 10),
+                Margin = new Thickness(0, 225, 0, 10),
             };
 
             layout.Children.Add(bt_registrate);
@@ -351,12 +332,30 @@ namespace YoungDevelopers
 
             #endregion
 
+            InitializeComponent();
+
+            try
+            {
+                savedoge = new UpdateDog();
+                savedoge.Name = ((UpdateDog)App.Current.Properties["savedoge"]).Name;
+                savedoge.Breed = ((UpdateDog)App.Current.Properties["savedoge"]).Breed;
+                savedoge.Weight = ((UpdateDog)App.Current.Properties["savedoge"]).Weight;
+                savedoge.BirthDate = ((UpdateDog)App.Current.Properties["savedoge"]).BirthDate;
+                en_nickname.Text = savedoge.Name.ToString();
+                en_breed.Text = savedoge.Breed.ToString();
+                en_weight.Text = savedoge.Weight == -1 ? "" : savedoge.Weight.ToString();
+                dp_birthdate.Date = DateTime.Parse(savedoge.BirthDate.ToString());
+            }
+            catch (Exception ex)
+            {
+            }
+
             // Контент страницы
             scrollview.Content = layout;
             scrollview.VerticalOptions = LayoutOptions.FillAndExpand;
             main.Children.Add(scrollview);
             this.Content = main;
-            InitializeComponent();
+
         }
 
         #region Обработка событий
@@ -373,18 +372,12 @@ namespace YoungDevelopers
 
         }
 
-        private void OnUploadClicked(object sender, EventArgs e)
-        {
-
-        }
-
         private async void OnRegistrateClicked(object sender, EventArgs e)
         {
-            //await Navigation.PushAsync(new MainPageDoge());
             lb_main_fields.IsVisible = false;
             if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Now.Date.ToString("dd.MM.yyyy") && en_nickname.Text == "" && en_breed.Text == "" && en_weight.Text == "")
             {
-                
+
                 return;
             }
             else
@@ -400,7 +393,10 @@ namespace YoungDevelopers
                         lb_main_fields.IsVisible = true;
                         return;
                     }
-                    //RegisterInfo
+                    bt_registrate.IsVisible = false;
+                    activityIndicator.IsVisible = true;
+                    activityIndicator.IsRunning = true;
+
                     UpdateDog createDog = new UpdateDog();
                     createDog.Name = en_nickname.Text;
                     createDog.Breed = en_breed.Text;
@@ -411,7 +407,7 @@ namespace YoungDevelopers
                     }
                     else
                     {
-                        createDog.BirthDate = dp_birthdate.Date;
+                        createDog.BirthDate = DateTime.SpecifyKind(dp_birthdate.Date, DateTimeKind.Utc);
                     }
 
                     RegisterInfo registerInfo = new RegisterInfo();
@@ -428,21 +424,6 @@ namespace YoungDevelopers
                     {
                         RegisterResponse response = await dogsCompanionClient.RegisterUserAsync(registerInfo);
 
-                        await DisplayAlert("Error", response.IsEmailInUse.ToString(), "OK");
-                        if (response.IsEmailInUse)
-                        {
-                            lb_reg_er.Text = "Такой E-mail уже зарегистрирован";
-                            await DisplayAlert("Error", "email is use", "OK");
-                            lb_reg_er.IsVisible = true;
-                            return;
-                        }
-
-                        if (response.IsPhoneInUse)
-                        {
-                            lb_reg_er.Text = "Пользователь с таким номером телефона уже зарегистрирован";
-                            lb_reg_er.IsVisible = true;
-                            return;
-                        }
 
                         // Установление ключа в httpclient
                         httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", response.AccessToken);
@@ -450,31 +431,57 @@ namespace YoungDevelopers
                         // Сохранение токенов в хранилище
                         await tokenController.SetRefreshTokenAsync(response.RefreshToken);
                         await tokenController.SetAccessTokenAsync(response.AccessToken);
-                                             
 
-                        // Установить текущего пользователя
+                        // Установить текущего пользователя 
                         DataControl.SetNewCurrentUser(response);
+
+                        bt_registrate.IsVisible = true;
+                        activityIndicator.IsVisible = false;
+                        activityIndicator.IsRunning = false;
+
+                        App.Current.Properties["savedoge"] = null;
+
                         App.Current.MainPage = new MainPage();
                     }
                     catch (ApiException apiExc)
                     {
-                        if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
+
+                        bt_registrate.IsVisible = true;
+                        activityIndicator.IsVisible = false;
+                        activityIndicator.IsRunning = false;
+                        if (apiExc.StatusCode == StatusCodes.Status409Conflict)
+                        {
+                            await DisplayAlert("Ошибка", "Почта или номер телефона уже используется", "OK");
+                        }
+                        else if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
+                        {
+                            await DisplayAlert("Ошибка", "Номер телефона уже используется", "OK");
+                        }
+                        else if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
                         {
                             lb_reg_er.Text = "Сервис недоступен";
                             lb_reg_er.IsVisible = true;
                         }
+                        else
+                        {
+                            await DisplayAlert("Ошибка", apiExc.Response, "OK");
+                        }
                     }
                     catch (Exception ex)
                     {
-                        await DisplayAlert("Error", ex.Message, "OK");
+                        bt_registrate.IsVisible = true;
+                        activityIndicator.IsVisible = false;
+                        activityIndicator.IsRunning = false;
+                        await DisplayAlert("Ошибка", ex.Message, "OK");
+
                     }
-                }             
+                }
             }
         }
 
         private void OnNicknameFocused(object sender, EventArgs e)
         {
-            fr_nickname.BorderColor = Color.SpringGreen;
+            fr_nickname.BorderColor = Color.FromRgb(105, 233, 165);
         }
 
         private void OnNicknameUnfocused(object sender, EventArgs e)
@@ -502,6 +509,7 @@ namespace YoungDevelopers
                     CheckRecField();
                 }
             }
+            OnDisappearing();
         }
 
         private void OnNicknameTextChanged(object sender, EventArgs e)
@@ -515,7 +523,7 @@ namespace YoungDevelopers
 
         private void OnBreedFocused(object sender, EventArgs e)
         {
-            fr_breed.BorderColor = Color.SpringGreen;
+            fr_breed.BorderColor = Color.FromRgb(105, 233, 165);
         }
 
         private void OnBreedUnfocused(object sender, EventArgs e)
@@ -542,6 +550,7 @@ namespace YoungDevelopers
                     CheckRecField();
                 }
             }
+            OnDisappearing();
         }
 
         private void OnBreedTextChanged(object sender, EventArgs e)
@@ -555,7 +564,7 @@ namespace YoungDevelopers
 
         private void OnWeightFocused(object sender, EventArgs e)
         {
-            fr_weight.BorderColor = Color.SpringGreen;
+            fr_weight.BorderColor = Color.FromRgb(105, 233, 165);
         }
 
         private void OnWeightUnfocused(object sender, EventArgs e)
@@ -564,7 +573,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_weight.Match(en_weight.Text);
-                if (!match.Success)
+                if (!match.Success || int.Parse(en_weight.Text) < 1 || int.Parse(en_weight.Text) > 200)
                 {
                     fr_weight.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_weight_er.IsVisible = true;
@@ -582,6 +591,12 @@ namespace YoungDevelopers
                     CheckRecField();
                 }
             }
+            OnDisappearing();
+        }
+
+        private void OnDateUnfocused(object sender, EventArgs e)
+        {
+            OnDisappearing();
         }
 
         private void OnWeightTextChanged(object sender, EventArgs e)
@@ -593,11 +608,56 @@ namespace YoungDevelopers
             en_weight.TextColor = Color.Black;
         }
 
-        public void OnDateSelected(object sender, EventArgs e)
+        public void OnDisappearing()
         {
-            hasDate = true;
+            try
+            {
+                savedoge = new UpdateDog();
+
+                if (fr_nickname.BorderColor != Color.FromRgb(194, 85, 85))
+                {
+                    savedoge.Name = en_nickname.Text;
+                }
+                else
+                {
+                    savedoge.Name = "";
+                }
+
+                if (fr_breed.BorderColor != Color.FromRgb(194, 85, 85))
+                {
+                    savedoge.Breed = en_breed.Text;
+                }
+                else
+                {
+                    savedoge.Breed = "";
+                }
+
+                if (fr_weight.BorderColor != Color.FromRgb(194, 85, 85))
+                {
+                    savedoge.Weight = en_weight.Text == "" ? -1 : int.Parse(en_weight.Text);
+                }
+                else
+                {
+                    savedoge.Weight = null;
+                }
+
+                savedoge.BirthDate = new DateTimeOffset(dp_birthdate.Date);
+
+                App.Current.Properties["savedoge"] = new UpdateDog();
+                ((UpdateDog)App.Current.Properties["savedoge"]).Name = savedoge.Name;
+                ((UpdateDog)App.Current.Properties["savedoge"]).Breed = savedoge.Breed;
+                ((UpdateDog)App.Current.Properties["savedoge"]).Weight = savedoge.Weight;
+                ((UpdateDog)App.Current.Properties["savedoge"]).BirthDate = savedoge.BirthDate;
+            }
+            catch (Exception e)
+            {
+            }
         }
 
+        public async void Msg(Exception e)
+        {
+            await DisplayAlert("Ошибка", e.Message, "OK");
+        }
         #endregion
     }
 }

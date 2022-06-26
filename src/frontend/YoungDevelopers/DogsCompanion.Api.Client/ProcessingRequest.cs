@@ -55,23 +55,29 @@ namespace DogsCompanion.Api.Client
 
         partial void ProcessResponse(System.Net.Http.HttpClient client, System.Net.Http.HttpResponseMessage response)
         {
-            if (response.StatusCode != System.Net.HttpStatusCode.Unauthorized)
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                return;
+                string jwt;
+                try
+                {
+                    jwt = client.DefaultRequestHeaders.Authorization.Parameter;
+                }
+                catch (Exception)
+                {
+                    return;
+                }
+                JwtSecurityToken parsedToken = TokenManager.GetParsedJwtToken(jwt);
+
+                var utcExpiryDate = long.Parse(parsedToken.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+                var expDate = TokenManager.UnixTimeStampToDateTime(utcExpiryDate);
+
+                if (DateTime.UtcNow < expDate)
+                {
+                    return;
+                }
+
+                RefreshToken(jwt);
             }
-
-            var jwt = client.DefaultRequestHeaders.Authorization.Parameter;
-            JwtSecurityToken parsedToken = TokenManager.GetParsedJwtToken(jwt);
-
-            var utcExpiryDate = long.Parse(parsedToken.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
-            var expDate = TokenManager.UnixTimeStampToDateTime(utcExpiryDate);
-
-            if (DateTime.UtcNow < expDate)
-            {
-                return;
-            }
-
-            RefreshToken(jwt);
         }
 
         private void RefreshToken(string jwt)

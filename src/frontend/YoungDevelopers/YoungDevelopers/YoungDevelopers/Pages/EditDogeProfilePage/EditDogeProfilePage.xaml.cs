@@ -1,14 +1,10 @@
 ﻿using DogsCompanion.Api.Client;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -18,20 +14,18 @@ namespace YoungDevelopers
         #region Инициализация 
         private int userID;
         private ReadDog UserDog;
-        private bool hasDate = false;
         private StackLayout layout;
         private ScrollView scrollview;
         private Frame fr_nickname, fr_breed, fr_weight, fr_birthdate;
         private ControlEntry en_nickname, en_breed, en_weight;
         private DatePickerControl dp_birthdate;
-        private Label lb_musthave, lb_nickname, lb_breed, lb_weight, lb_birthdate, lb_nickname_er, lb_breed_er, lb_weight_er,
+        private Label lb_nickname, lb_breed, lb_weight, lb_birthdate, lb_nickname_er, lb_breed_er, lb_weight_er,
             lb_update_er;
         private Button bt_registrate;
         private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
         private Regex
-            re_nickname = new Regex(@"^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$"),
-            re_weight = new Regex("[+-]?([0-9]*[.])?[0-9]+");
-
+            re_nickname = new Regex(RegexConstants.DogName),
+            re_weight = new Regex(RegexConstants.Weight);
         #endregion
 
         public EditDogeProfilePage()
@@ -43,7 +37,6 @@ namespace YoungDevelopers
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
 
             // Получение данных
-            App.Current.Properties["currentuserid"] = 1;
             userID = (int)App.Current.Properties["currentuserid"];
             UserDog = DataControl.GetUserDogItem(userID);
 
@@ -206,12 +199,12 @@ namespace YoungDevelopers
 
             layout.Children.Add(fr_weight);
 
-            // Ошибка при вводе породы
+            // Ошибка при вводе веса
             lb_weight_er = new Label()
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Неправильный формат веса собаки",
+                Text = "Вес собаки должен быть от 1 до 200 кг",
                 Margin = new Thickness(15, -5, 0, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,
@@ -241,8 +234,6 @@ namespace YoungDevelopers
                 Format = "dd.MM.yyyy",
             };
 
-            dp_birthdate.DateSelected += OnDateSelected;
-
             fr_birthdate = new Frame
             {
                 Content = dp_birthdate,
@@ -257,7 +248,6 @@ namespace YoungDevelopers
             layout.Children.Add(fr_birthdate);
 
             // Кнопка регистрация
-
             bt_registrate = new Button()
             {
                 Text = "Сохранить изменения",
@@ -265,7 +255,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -304,7 +294,7 @@ namespace YoungDevelopers
         private async void OnSaveClicked(object sender, EventArgs e)
         {
             lb_update_er.IsVisible = false;
-            if ((dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.UtcNow.Date.ToString("dd.MM.yyyy") || dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Parse(UserDog.BirthDate.ToString()).ToString("dd.MM.yyyy")) && en_breed.Text == "" && en_nickname.Text == "" && en_weight.Text == "")
+            if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.UtcNow.Date.ToString("dd.MM.yyyy") && en_breed.Text == "" && en_nickname.Text == "" && en_weight.Text == "")
             {
                 
                 return;
@@ -313,7 +303,6 @@ namespace YoungDevelopers
             {
                 if (fr_nickname.BorderColor == Color.FromRgb(194, 85, 85) || fr_breed.BorderColor == Color.FromRgb(194, 85, 85) || fr_weight.BorderColor == Color.FromRgb(194, 85, 85))
                 {
-                    await DisplayAlert("Error", "Все косяк", "OK");
                     return;
                 }
                 else
@@ -344,7 +333,7 @@ namespace YoungDevelopers
                     }
                     else
                     {
-                        updateDog.Weight = Int32.Parse(en_weight.Text);
+                        updateDog.Weight = int.Parse(en_weight.Text);
                     }
 
                     if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.UtcNow.Date.ToString("dd.MM.yyyy"))
@@ -353,13 +342,13 @@ namespace YoungDevelopers
                     }
                     else
                     {
-                        //updateDog.BirthDate = new DateTimeOffset(dp_birthdate.Date);
-                        updateDog.BirthDate = UserDog.BirthDate;
+                        updateDog.BirthDate = DateTime.SpecifyKind(dp_birthdate.Date, DateTimeKind.Utc);
                     }
 
                     try
                     {
                         await dogsCompanionClient.PutDogAsync(updateDog);
+                        DataControl.SetReadDogItem(await dogsCompanionClient.GetDogsAsync());
                         await Navigation.PopAsync();
                     }
                     catch (ApiException apiExc)
@@ -369,6 +358,7 @@ namespace YoungDevelopers
                             lb_update_er.Text = "Сервис недоступен";
                             lb_update_er.IsVisible = true;
                         }
+                        await DisplayAlert("Error", apiExc.Message, "OK");
                     }
                     catch (Exception ex)
                     {
@@ -376,13 +366,11 @@ namespace YoungDevelopers
                     }
                 }
             }
-            //
-            //await Navigation.PopAsync();
         }
 
         private void OnNicknameFocused(object sender, EventArgs e)
         {
-            fr_nickname.BorderColor = Color.SpringGreen;
+            fr_nickname.BorderColor = Color.FromRgb(105,233,165);
         }
 
         private void OnNicknameUnfocused(object sender, EventArgs e)
@@ -422,7 +410,7 @@ namespace YoungDevelopers
 
         private void OnBreedFocused(object sender, EventArgs e)
         {
-            fr_breed.BorderColor = Color.SpringGreen;
+            fr_breed.BorderColor = Color.FromRgb(105,233,165);
         }
 
         private void OnBreedUnfocused(object sender, EventArgs e)
@@ -462,7 +450,7 @@ namespace YoungDevelopers
 
         private void OnWeightFocused(object sender, EventArgs e)
         {
-            fr_weight.BorderColor = Color.SpringGreen;
+            fr_weight.BorderColor = Color.FromRgb(105,233,165);
         }
 
         private void OnWeightUnfocused(object sender, EventArgs e)
@@ -472,7 +460,7 @@ namespace YoungDevelopers
             else
             {
                 Match match = re_weight.Match(en_weight.Text);
-                if (!match.Success)
+                if (!match.Success || int.Parse(en_weight.Text) < 1 || int.Parse(en_weight.Text) > 200)
                 {
                     fr_weight.BorderColor = Color.FromRgb(194, 85, 85);
                     lb_weight_er.IsVisible = true;
@@ -500,74 +488,22 @@ namespace YoungDevelopers
             en_weight.TextColor = Color.Black;
         }
 
-        public void OnDateSelected(object sender, EventArgs e)
-        {
-            hasDate = true;
-        }
-
         #endregion
 
         public async void UpdateFieldsFromServer()
         {
-            #region подгрузка
-            string email = "spistsov@gmail.com";
-            string password = "Billy1!";
-            SendAuth sendauth = new SendAuth();
-            sendauth.email = email;
-            sendauth.password = password;
-
-            var httpClient = DataControl.httpClient;
-            var tokenController = DataControl.tokenController;
-
-
             try
             {
-                var authInfo = new AuthInfo()
-                {
-                    Email = email,
-                    Password = password,
-                };
-
-                var authResponse = await dogsCompanionClient.AuthenticateAsync(authInfo);
-
-                // Установление ключа в httpclient
-                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
-
-                // Сохранение токенов в хранилище
-                await tokenController.SetRefreshTokenAsync(authResponse.RefreshToken);
-                await tokenController.SetAccessTokenAsync(authResponse.AccessToken);
-
-                // Установить текущего пользователя
-                DataControl.SetCurrentUser(authResponse);
-
-                // Переход на главную страницу
-                // TODO сохранить полученные данные из authInfo
-                // TODO поменять Main страницу
+                UserDog = await dogsCompanionClient.GetDogsAsync();
+                en_nickname.Placeholder = UserDog.Name;
+                en_breed.Placeholder = UserDog.Breed;
+                en_weight.Placeholder = UserDog.Weight.ToString();
+                dp_birthdate.Date = UserDog.BirthDate == null ? DateTime.UtcNow : DateTime.Parse(UserDog.BirthDate.ToString());
             }
-            catch (ApiException apiExc)
+            catch(Exception e)
             {
-                if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
-                {
-                }
-                else if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
-                {
-                }
+                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
             }
-            catch (Exception)
-            {
-            }
-            #endregion
-            UserDog = await dogsCompanionClient.GetDogsAsync();
-
-            en_nickname.Placeholder = UserDog.Name;
-            en_breed.Placeholder = UserDog.Breed;
-            en_weight.Placeholder = UserDog.Weight.ToString();
-            dp_birthdate.Date = UserDog.BirthDate == null ? DateTime.UtcNow : DateTime.Parse(UserDog.BirthDate.ToString()); 
-
-            // Заполнить поля
-
-            // УЧЕСТЬ ПОЛЯ ПОЛЬЗОВАТЕЛЯ - СОБАКА
-            // А ЕЩЕ ЕСТЬ СПИСОК СОБАК
         }
     }
 }

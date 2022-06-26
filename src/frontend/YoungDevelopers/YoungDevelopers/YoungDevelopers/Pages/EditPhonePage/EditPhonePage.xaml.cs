@@ -1,9 +1,9 @@
 ﻿using DogsCompanion.Api.Client;
-using Microsoft.AspNetCore.Http;
 using System;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -17,9 +17,9 @@ namespace YoungDevelopers
         private Frame fr_phone, fr_password;
         private Button bt_save;
         private ControlEntry en_password;
-        private Label lb_main_fields, lb_phone, lb_phone_er, lb_phone_exists, lb_password, lb_password_er;
+        private Label lb_main_fields, lb_phone, lb_phone_er, lb_password, lb_password_er;
         DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
-        private Regex re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$");
+        private Regex re_password = new Regex(RegexConstants.Password);
         #endregion
         public EditPhonePage()
         {
@@ -29,7 +29,6 @@ namespace YoungDevelopers
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
 
             // Получение данных
-            //App.Current.Properties["currentuserid"] = 1;
             user = DataControl.GetCurrentUserItem();
 
 
@@ -141,7 +140,7 @@ namespace YoungDevelopers
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Пароль должен содержать хотя бы одну цифру, латинскую букву в нижнем регистре, латинскую букву в верхнем регистре и спецсимвол",
+                Text = ErrorConstants.PasswordRequirements,
                 Margin = new Thickness(15, -5, 0, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,
@@ -157,7 +156,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -166,18 +165,6 @@ namespace YoungDevelopers
 
             layout.Children.Add(bt_save);
             bt_save.Clicked += OnSaveClicked;
-
-
-            // Пользователь с таким номером телефона уже зарегистрирован
-            lb_phone_exists = new Label()
-            {
-                IsVisible = false,
-                FontFamily = "Cascadia Code Light",
-                Text = "Пользователь с таким номером телефона уже зарегистрирован",
-                Margin = new Thickness(15, -5, 0, -1),
-                VerticalOptions = LayoutOptions.Start,
-                TextColor = Color.Red,
-            };
 
             // Пользователь с таким номером телефона уже зарегистрирован
             lb_main_fields = new Label()
@@ -209,7 +196,6 @@ namespace YoungDevelopers
                     lb_main_fields.IsVisible = false;
                 }
             }
-
         }
 
         public void OnPhoneTextChanged(object sender, EventArgs e)
@@ -223,7 +209,7 @@ namespace YoungDevelopers
 
         public void OnPhoneFocusedChanged(object sender, EventArgs e)
         {
-            fr_phone.BorderColor = Color.SpringGreen;
+            fr_phone.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnPhoneUnfocused(object sender, EventArgs e)
@@ -263,7 +249,7 @@ namespace YoungDevelopers
 
         public void OnPasswordFocused(object sender, EventArgs e)
         {
-            fr_password.BorderColor = Color.SpringGreen;
+            fr_password.BorderColor = Color.FromRgb(105,233,165);
         }
 
         public void OnPasswordUnfocused(object sender, EventArgs e)
@@ -295,7 +281,6 @@ namespace YoungDevelopers
 
         public async void OnSaveClicked(object sender, EventArgs e)
         {
-            //lb_phone_exists и еще кучу всего
             lb_main_fields.IsVisible = false;
             if (en_password.Text == "" && me_phone.Text == "")
             {
@@ -322,6 +307,7 @@ namespace YoungDevelopers
                         try
                         {
                             await dogsCompanionClient.ChangePhoneAsync(changePhone);
+                            DataControl.SetUserInfoItem(await dogsCompanionClient.GetUserInfoAsync());
                             await Navigation.PopAsync();
                         }
                         catch (ApiException ex)
@@ -345,73 +331,31 @@ namespace YoungDevelopers
 
         public async void UpdateFieldsFromServer()
         {
-            //#region подгрузка
-            //string email = "spistsov@gmail.com";
-            //string password = "Billy1!";
-            //SendAuth sendauth = new SendAuth();
-            //sendauth.email = email;
-            //sendauth.password = password;
-
-            //var httpClient = DataControl.httpClient;
-            //var tokenController = DataControl.tokenController;
-
-
-            //try
-            //{
-            //    var authInfo = new AuthInfo()
-            //    {
-            //        Email = email,
-            //        Password = password,
-            //    };
-
-            //    var authResponse = await dogsCompanionClient.AuthenticateAsync(authInfo);
-
-            //    // Установление ключа в httpclient
-            //    httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
-
-            //    // Сохранение токенов в хранилище
-            //    await tokenController.SetRefreshTokenAsync(authResponse.RefreshToken);
-            //    await tokenController.SetAccessTokenAsync(authResponse.AccessToken);
-
-            //    // Установить текущего пользователя
-            //    DataControl.SetCurrentUser(authResponse);
-
-            //    // Переход на главную страницу
-            //    // TODO сохранить полученные данные из authInfo
-            //    // TODO поменять Main страницу
-            //}
-            //catch (ApiException apiExc)
-            //{
-            //    if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
-            //    {
-            //    }
-            //    else if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
-            //    {
-            //    }
-            //}
-            //catch (Exception)
-            //{
-            //}
-            //#endregion
-            UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
-
-            string phone = updateUser.PhoneNumber.ToString();
-            if (phone.StartsWith("+7"))
+            try
             {
-                me_phone.Placeholder = phone;
-            }
-            else
-            {
-                try
-                {
-                    me_phone.Placeholder = "+7 (" + phone.Substring(1, 3) + ") " + phone.Substring(3, 3) + '-' + phone.Substring(7, 2) + '-' + phone.Substring(9, 2);
-                }
-                catch (Exception e)
+                UserInfo updateUser = (UserInfo)await dogsCompanionClient.GetUserInfoAsync();
+
+                string phone = updateUser.PhoneNumber.ToString();
+                if (phone.StartsWith("+7"))
                 {
                     me_phone.Placeholder = phone;
                 }
+                else
+                {
+                    try
+                    {
+                        me_phone.Placeholder = "+7 (" + phone.Substring(1, 3) + ") " + phone.Substring(3, 3) + '-' + phone.Substring(7, 2) + '-' + phone.Substring(9, 2);
+                    }
+                    catch (Exception e)
+                    {
+                        me_phone.Placeholder = phone;
+                    }
+                }
             }
-            
+            catch (Exception e)
+            {
+                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+            }
         }
     }
 }

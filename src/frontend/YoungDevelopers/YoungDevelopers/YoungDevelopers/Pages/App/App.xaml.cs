@@ -12,27 +12,11 @@ namespace YoungDevelopers
 
         public App()
         {
-            CreateClient();
-            DataControl.LoadData();
+            //CreateClient();
+            //DataControl.LoadData();
             InitializeComponent();
-            DependencyService.Register<MockDataStore>();
-
-            #region Инициализация свойства для хранения данных
-
-            // Загрузка данных данных
-            /* 1) При открытии приложения загрузить новые данные с сервера
-             * 2) Если загрузить не удалось - достаем из сериализованного файла в Properties
-             * 3) При переходе на страницы, которые отображают/запрашивают данные, обращаемся к серверу и обновляем Properties
-             * 4) По закрытии приложения сериализовать Properties данные снова в файл
-            */
-            #endregion
-
-            MainPage = new NavigationPage(new LoginPage());
-            //MainPage = new MainPage();
-            //MainPage = new NavigationPage(new EditDogeProfilePage());
-            //App.Current.Properties["currentuserid"] = 0;
-            //DataControl.LoadTestUser();
-            //MainPage = new VetClinicsPage();
+            //DependencyService.Register<MockDataStore>();
+            //MainPage = new NavigationPage(new LoginPage());
         }
 
         private void CreateClient()
@@ -46,7 +30,6 @@ namespace YoungDevelopers
             string baseUrl = "https://exp-webapi.herokuapp.com/";
             var dogsCompanionClient = new DogsCompanionClient(baseUrl, httpClient, tokenController);
             dogsCompanionClient.UpdatedToken += UpdateTokens; // Событие по получению новых токенов
-            dogsCompanionClient.FailedServerUpdateToken += FailedUpdateToken; // Событие при неудачном обновлении токена
             dogsCompanionClient.FailedServerUpdateToken += FailedServerUpdateToken;
 
             App.Current.Properties["dogsCompanionClient"] = dogsCompanionClient;
@@ -60,16 +43,8 @@ namespace YoungDevelopers
             await tokenController.SetAccessTokenAsync(accessToken);
         }
 
-        private void FailedUpdateToken()
-        {
-            // TODO Выйти на экран авторизации, при неудачном обновлении токена
-        }
-
         private async void FailedServerUpdateToken()
         {
-            // TODO обработка события, если серверная ошибка обновления токена
-            // По уму сделать крутилку, что идет ожидание и пытаться повторно обновить токен
-
             var tokenController = (TokenController)App.Current.Properties["tokenController"];
             var refreshTokenRequest = new RefreshTokenRequest()
             {
@@ -77,25 +52,72 @@ namespace YoungDevelopers
                 AccessToken = await tokenController.GetAccessTokenAsync(),
             };
 
-            // Повторное обновление токена
-            /*
-            try
-            {
-                var dogsCompanionClient = (DogsCompanionClient)App.Current.Properties["dogsCompanionClient"];
-                await dogsCompanionClient.RefreshAsync(refreshTokenRequest);
-            }
-            catch (System.Exception)
-            {
-                // TODO обработка ошибки
-                throw;
-            }
-            */
-
         }
 
-        protected override void OnStart()
+        protected override async void OnStart()
         {
+            var httpClient = new HttpClient();
+            App.Current.Properties["httpClient"] = httpClient;
 
+            IToken tokenController = new TokenController();
+            App.Current.Properties["tokenController"] = new TokenController();
+
+            string baseUrl = "https://exp-webapi.herokuapp.com/";
+            var dogsCompanionClient = new DogsCompanionClient(baseUrl, httpClient, tokenController);
+            dogsCompanionClient.UpdatedToken += UpdateTokens; // Событие по получению новых токенов
+            dogsCompanionClient.FailedServerUpdateToken += FailedServerUpdateToken;
+
+            App.Current.Properties["dogsCompanionClient"] = dogsCompanionClient;
+
+            DataControl.LoadData();
+
+            string accessToken = null;
+            try
+            {
+                accessToken = await tokenController.GetAccessTokenAsync();
+            }
+            catch (System.Exception) { }
+
+            // Если есть токен, то делаем действия аналогично авторизации
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                // Установление ключа в httpclient
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                try
+                {
+                    var userInfo = await dogsCompanionClient.GetUserInfoAsync();
+                    var dogInfo = await dogsCompanionClient.GetDogsAsync();
+
+                    var authResponse = new AuthResponse()
+                    {
+                        Id = userInfo.Id,
+                        Email = userInfo.Email,
+                        PhoneNumber = userInfo.PhoneNumber,
+                        FirstName = userInfo.FirstName,
+                        LastName = userInfo.LastName,
+                        MiddleName = userInfo.MiddleName,
+                        BirthDate = userInfo.BirthDate,
+                    };
+                    DataControl.SetAuthData(authResponse, dogInfo);
+                    DataControl.SetUserInfoItem(userInfo);
+
+
+                    MainPage = new NavigationPage(new LoginPage());
+                    App.Current.MainPage = new MainPage();
+                }
+                catch (System.Exception)
+                {
+                    
+                    App.Current.MainPage = new Page();
+                    await Application.Current.MainPage.DisplayAlert("", "Сервис не доступен", "OK");
+                    System.Diagnostics.Process.GetCurrentProcess().CloseMainWindow();
+                }
+            }
+            else
+            {
+                MainPage = new NavigationPage(new LoginPage());
+            }
         }
 
         protected override void OnSleep()

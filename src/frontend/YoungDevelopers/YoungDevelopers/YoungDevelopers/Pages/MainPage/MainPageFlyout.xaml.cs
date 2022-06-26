@@ -1,6 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using DogsCompanion.Api.Client;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -10,8 +10,8 @@ namespace YoungDevelopers
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainPageFlyout : ContentPage
     {
+        private UserInfo user;
         public ListView ListView;
-        public static string AccountName = "Стасян";
 
         public MainPageFlyout()
         {

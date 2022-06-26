@@ -221,7 +221,7 @@ namespace YoungDevelopers
             ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).FirstName = updateUser.FirstName;
             ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).LastName = updateUser.LastName;
             ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).MiddleName = updateUser.MiddleName;
-            ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).BirthDate = updateUser.BirthDate;
+            ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == updateUser.Id).BirthDate = updateUser.BirthDate;      
         }
 
         public static void SetReadDogItem(ReadDog updateDoge)
@@ -235,7 +235,7 @@ namespace YoungDevelopers
         public static string GetHoursString(bool AllDay, string weekDay, ICollection<Period> dayPeriod)
         {
             if (AllDay) return weekDay + ": КРУГЛОСУТОЧНО";
-            return weekDay + ": " + (dayPeriod.Count == 0 ? "ВЫХОДНОЙ" : dayPeriod.First().Open.UtcDateTime.Hour.ToString() + ":00" + '-' + dayPeriod.Last().Open.UtcDateTime.Hour.ToString() + ":00");
+            return weekDay + ": " + (dayPeriod.Count == 0 ? "ВЫХОДНОЙ" : dayPeriod.First().Open.Hour.ToString() + ":00" + '-' + dayPeriod.First().Close.Hour.ToString() + ":00");
         }
 
         public static string GetEmoji(bool value)
@@ -243,9 +243,11 @@ namespace YoungDevelopers
             if (value)
             {
                 return new Emoji(0x2714).ToString();
+                //return "ДА";
             }
             else
             {
+                //return "НЕТ";
                 return new Emoji(0x274C).ToString();
             }
         }

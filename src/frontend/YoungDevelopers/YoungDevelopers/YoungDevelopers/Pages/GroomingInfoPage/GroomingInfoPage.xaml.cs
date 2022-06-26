@@ -1,4 +1,5 @@
 ﻿using DogsCompanion.Api.Client;
+using System;
 using System.Linq;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -17,7 +18,7 @@ namespace YoungDevelopers
             lb_monday, lb_tuesday, lb_wednesday, lb_thursday, lb_friday, lb_saturday, lb_sunday;
         private GroomerSalon GroomSalon;
         private Button bt_name;
-        DogsCompanionClient dogsCompanionClient = (DogsCompanionClient)App.Current.Properties["dogsCompanionClient"];
+        DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
 
         #endregion
         public GroomingInfoPage(int groomingId)
@@ -32,13 +33,12 @@ namespace YoungDevelopers
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
 
             #region Элементы страницы
-
             bt_name = new CustomButton
             {
                 
                 Text = GroomSalon.Name,
                 FontAttributes = FontAttributes.Bold,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 8,
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
@@ -84,14 +84,37 @@ namespace YoungDevelopers
                 TextColor = Color.Black,
                 FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(15, 0, 0, 0),
+                TextDecorations = TextDecorations.Underline,
             };
+
+            System.Windows.Input.ICommand command = new Command<string>((url) =>
+            {
+                try
+                {
+                    string formttedUrl = url;
+                    if (!url.StartsWith("http"))
+                    {
+                        formttedUrl = $"http://{url}";
+                    }
+                    Xamarin.Essentials.Launcher.OpenAsync(formttedUrl);
+                }
+                catch (Exception)
+                {
+                }
+            });
+
+            lb_site.GestureRecognizers.Add(new TapGestureRecognizer()
+            {
+                Command = command,
+                CommandParameter = GroomSalon.Link
+            });
 
             layout.Children.Add(lb_site);
 
             lb_rating = new Label()
             {
                 HorizontalOptions = LayoutOptions.Start,
-                Text = "Рейтинг: " + GroomSalon.Rating.ToString() + " ИЗ " + '5',
+                Text = "Рейтинг: " + (GroomSalon.Rating == 0 ? "нет оценок" : $"{GroomSalon.Rating} из 5"),
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
@@ -214,27 +237,31 @@ namespace YoungDevelopers
 
             UpdateFieldsFromServer();
         }
-        #region Обработка событий
-
-        #endregion
 
         public async void UpdateFieldsFromServer()
         {
-            GroomSalon = (GroomerSalon)await dogsCompanionClient.GetGroomerSalonAsync(GroomingId);
-            DataControl.SetGroomingItem(GroomSalon);
+            try
+            {
+                GroomSalon = (GroomerSalon)await dogsCompanionClient.GetGroomerSalonAsync(GroomingId);
+                DataControl.SetGroomingItem(GroomSalon);
 
-            bt_name.Text = GroomSalon.Name;
-            lb_address.Text = "Адрес: " + GroomSalon.Address;
-            lb_phone.Text = "Телефон: " + GroomSalon.PhoneNumber;
-            lb_site.Text = "Сайт: " + GroomSalon.Link;
-            lb_rating.Text = "Рейтинг: " + GroomSalon.Rating.ToString() + " ИЗ " + '5';
-            lb_monday.Text = DataControl.GetHoursString(AllDay, "ПН", GroomSalon.OpeningHours.First(s => s.Day == Day._1).Periods);
-            lb_tuesday.Text = DataControl.GetHoursString(AllDay, "ВТ", GroomSalon.OpeningHours.First(s => s.Day == Day._2).Periods);
-            lb_wednesday.Text = DataControl.GetHoursString(AllDay, "СР", GroomSalon.OpeningHours.First(s => s.Day == Day._3).Periods);
-            lb_thursday.Text = DataControl.GetHoursString(AllDay, "ЧТ", GroomSalon.OpeningHours.First(s => s.Day == Day._4).Periods);
-            lb_friday.Text = DataControl.GetHoursString(AllDay, "ПТ", GroomSalon.OpeningHours.First(s => s.Day == Day._5).Periods);
-            lb_saturday.Text = DataControl.GetHoursString(AllDay, "СБ", GroomSalon.OpeningHours.First(s => s.Day == Day._6).Periods);
-            lb_sunday.Text = DataControl.GetHoursString(AllDay, "ВС", GroomSalon.OpeningHours.First(s => s.Day == Day._7).Periods);
+                bt_name.Text = GroomSalon.Name;
+                lb_address.Text = "Адрес: " + GroomSalon.Address;
+                lb_phone.Text = "Телефон: " + GroomSalon.PhoneNumber;
+                lb_site.Text = "Сайт: " + GroomSalon.Link;
+                lb_rating.Text = "Рейтинг: " + (GroomSalon.Rating == 0 ? "нет оценок" : $"{GroomSalon.Rating} из 5");
+                lb_monday.Text = DataControl.GetHoursString(AllDay, "ПН", GroomSalon.OpeningHours.First(s => s.Day == Day._1).Periods);
+                lb_tuesday.Text = DataControl.GetHoursString(AllDay, "ВТ", GroomSalon.OpeningHours.First(s => s.Day == Day._2).Periods);
+                lb_wednesday.Text = DataControl.GetHoursString(AllDay, "СР", GroomSalon.OpeningHours.First(s => s.Day == Day._3).Periods);
+                lb_thursday.Text = DataControl.GetHoursString(AllDay, "ЧТ", GroomSalon.OpeningHours.First(s => s.Day == Day._4).Periods);
+                lb_friday.Text = DataControl.GetHoursString(AllDay, "ПТ", GroomSalon.OpeningHours.First(s => s.Day == Day._5).Periods);
+                lb_saturday.Text = DataControl.GetHoursString(AllDay, "СБ", GroomSalon.OpeningHours.First(s => s.Day == Day._6).Periods);
+                lb_sunday.Text = DataControl.GetHoursString(AllDay, "ВС", GroomSalon.OpeningHours.First(s => s.Day == Day._7).Periods);
+            }
+            catch (Exception e)
+            {
+                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+            }
         }
     }
 }

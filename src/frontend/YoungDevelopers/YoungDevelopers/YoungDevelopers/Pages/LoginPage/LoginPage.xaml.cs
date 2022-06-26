@@ -4,9 +4,11 @@ using System;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using Rox;
 using System.Net.Http;
 using YoungDevelopers.Client;
+using System.Collections.Generic;
+using System.Linq;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -20,16 +22,15 @@ namespace YoungDevelopers
     public partial class LoginPage : ContentPage
     {
         #region Инициализация 
-        private StackLayout layout, lay_registraion;
+        private ActivityIndicator activityIndicator;
+        private StackLayout layout;
         private Image im_pug;
-        private Label lb_dogass, lb_register,
+        private Label lb_dogass,
             lb_login_error, lb_pair_error, lb_logging_er;
         private ControlEntry en_login, en_password;
-        private Button bt_login, bt_register, bt_recover;
+        private Button bt_login, bt_register;
         private Frame fr_login, fr_pass;
-        private VideoView video;
-        private Action startVideo;
-        private Regex re_email = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
+        private Regex re_email = new Regex(RegexConstants.Email);
         private SendAuth sendauth;
         private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
         private HttpClient httpClient = DataControl.httpClient;
@@ -50,15 +51,11 @@ namespace YoungDevelopers
             layout.VerticalOptions = LayoutOptions.FillAndExpand;
             layout.BackgroundColor = Color.FromRgb(242, 242, 242);
 
-            #region Получение данных
-
-            #endregion
-
             #region Элементы страницы
             // Мопс
             im_pug = new Image
             {
-                Source = "ben.jpg",
+                Source = "pyops.png",
                 Margin = new Thickness(50, 50, 50, 0),
                 BackgroundColor = Color.FromRgb(242, 242, 242),
             };
@@ -158,6 +155,16 @@ namespace YoungDevelopers
 
             layout.Children.Add(fr_pass);
 
+            activityIndicator = new ActivityIndicator
+            {
+                IsVisible = false,
+                IsRunning = false,
+                VerticalOptions = LayoutOptions.Center,
+                HorizontalOptions = LayoutOptions.Center,
+                Color = Color.FromRgb(105, 233, 165)
+            };
+
+            layout.Children.Add(activityIndicator);
 
             // Кнопка "Вход" с фоном
             bt_login = new Button
@@ -167,7 +174,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 10,
                 WidthRequest = 370
             };
@@ -201,51 +208,22 @@ namespace YoungDevelopers
 
             layout.Children.Add(lb_logging_er);
 
-            // Кнопка забыл пароль
-            bt_recover = new Button
-            {
-                Text = "Забыли пароль?",
-                FontAttributes = FontAttributes.Bold,
-                FontFamily = "Cascadia Code Light",
-                BackgroundColor = Color.Transparent,
-                Margin = new Thickness(0, -5, 0, 0),
-                TextColor = Color.Gray,
-            };
-            bt_recover.Clicked += OnForgetButtonClicked;
-            layout.Children.Add(bt_recover);
-
-            // Регистрация
-            lay_registraion = new StackLayout();
-            lay_registraion.Orientation = StackOrientation.Horizontal;
-            lay_registraion.HorizontalOptions = LayoutOptions.Center;
-            lay_registraion.VerticalOptions = LayoutOptions.End;
-            lay_registraion.Padding = new Thickness(0, 150, 0, 15);
-
-
-            // Label нет аккаунта
-            lb_register = new Label
-            {
-                FontFamily = "Cascadia Code Light",
-                Text = "Нет аккаунта?",
-                FontAttributes = FontAttributes.Bold,
-                VerticalOptions = LayoutOptions.Center,
-            };
-            lay_registraion.Children.Add(lb_register);
-
             // Кнопка "Регистрация" с фоном
             bt_register = new Button
             {
-                FontFamily = "Cascadia Code Light",
                 Text = "Зарегистрироваться",
                 FontAttributes = FontAttributes.Bold,
-                BackgroundColor = Color.SpringGreen,
+                FontFamily = "Cascadia Code Light",
+                TextColor = Color.White,
+                HorizontalOptions = LayoutOptions.Center,
+                BackgroundColor = Color.FromRgb(105, 233, 165),
                 CornerRadius = 10,
+                WidthRequest = 370,
+                Margin = new Thickness(0,200,0,0)
             };
             bt_register.Clicked += OnRegisterButtonClicked;
 
-            lay_registraion.Children.Add(bt_register);
-
-            layout.Children.Add(lay_registraion);
+            layout.Children.Add(bt_register);
 
             #endregion
 
@@ -264,11 +242,11 @@ namespace YoungDevelopers
             }
             if (lb_login_error.IsVisible)
             {
-                lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+                bt_register.Margin = new Thickness(0, 180, 0, 20);
             }
             else
             {
-                lay_registraion.Padding = new Thickness(0, 150, 0, 15);
+                bt_register.Margin = new Thickness(0, 200, 0, 15);
             }
             lb_logging_er.IsVisible = false;
             if (fr_login.BorderColor == Color.White)
@@ -279,6 +257,10 @@ namespace YoungDevelopers
 
                 try
                 {
+                    bt_login.IsVisible = false;
+                    bt_register.IsVisible = false;
+                    activityIndicator.IsVisible = true;
+                    activityIndicator.IsRunning = true;
                     var authInfo = new AuthInfo()
                     {
                         Email = en_login.Text,
@@ -286,6 +268,7 @@ namespace YoungDevelopers
                     };
 
                     var authResponse = await dogsCompanionClient.AuthenticateAsync(authInfo);
+
 
                     // Установление ключа в httpclient
                     httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
@@ -295,32 +278,57 @@ namespace YoungDevelopers
                     await tokenController.SetAccessTokenAsync(authResponse.AccessToken);
                     ReadDog addDog = await dogsCompanionClient.GetDogsAsync();
 
+                    var userInfo = new UserInfo
+                    {
+                        Id = authResponse.Id,
+                        Email = authResponse.Email,
+                        PhoneNumber = authResponse.PhoneNumber,
+                        FirstName = authResponse.FirstName,
+                        LastName = authResponse.LastName,
+                        MiddleName = authResponse.MiddleName,
+                        BirthDate = authResponse.BirthDate,
+                    };
+
                     // Загрузить информацию о пользователе
                     DataControl.SetAuthData(authResponse, addDog);
+                    bt_login.IsVisible = true;
+                    bt_register.IsVisible = true;
+                    activityIndicator.IsVisible = false;
+                    activityIndicator.IsRunning = false;
+
+                    DataControl.SetUserInfoItem(userInfo);
+
+                    //var test = ((Data)App.Current.Properties["storedata"]).Users.First(s => s.Id == userInfo.Id);
 
                     // Переход на главную страницу
-                    // TODO сохранить полученные данные из authInfo
-                    // TODO поменять Main страницу
                     App.Current.MainPage = new MainPage();
                 }
                 catch (ApiException apiExc)
                 {
+                    bt_login.IsVisible = true;
+                    bt_register.IsVisible = true;
+                    activityIndicator.IsVisible = false;
+                    activityIndicator.IsRunning = false;
                     if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
                     {
-                        lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+                        bt_register.Margin = new Thickness(0, 180, 0, 20);
                         lb_logging_er.Text = "Сервис недоступен";
                         lb_logging_er.IsVisible = true;
                     }
                     else if (apiExc.StatusCode == StatusCodes.Status401Unauthorized)
                     {
-                        lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+                        bt_register.Margin = new Thickness(0, 180, 0, 20);
                         lb_logging_er.Text = "Неверный логин или пароль";
                         lb_logging_er.IsVisible = true;
                     }
                 }
                 catch (Exception)
                 {
-                    lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+                    bt_login.IsVisible = true;
+                    bt_register.IsVisible = true;
+                    activityIndicator.IsVisible = false;
+                    activityIndicator.IsRunning = false;
+                    bt_register.Margin = new Thickness(0, 180, 0, 20);
                     lb_logging_er.Text = "Произошла непредвиденная ошибка";
                     lb_logging_er.IsVisible = true;
                 }
@@ -344,7 +352,7 @@ namespace YoungDevelopers
             fr_login.BackgroundColor = Color.White;
             en_login.BackgroundColor = Color.White;
             en_login.TextColor = Color.Black;
-            lay_registraion.Padding = new Thickness(0, 150, 0, 15);
+            bt_register.Margin = new Thickness(0, 200, 0, 15);
         }
 
         private void OnLoginUnfocused(object sender, EventArgs e)
@@ -361,7 +369,7 @@ namespace YoungDevelopers
                     fr_login.BackgroundColor = Color.FromRgb(255, 187, 187);
                     en_login.BackgroundColor = Color.FromRgb(255, 187, 187);
                     en_login.TextColor = Color.FromRgb(194, 85, 85);
-                    lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+                    bt_register.Margin = new Thickness(0, 180, 0, 20);
                 }
                 else
                 {
@@ -370,29 +378,28 @@ namespace YoungDevelopers
                     fr_login.BackgroundColor = Color.White;
                     en_login.BackgroundColor = Color.White;
                     en_login.TextColor = Color.Black;
-                    lay_registraion.Padding = new Thickness(0, 150, 0, 15);
-                    
+                    bt_register.Margin = new Thickness(0, 200, 0, 15);
                 }
             }
         }
         private void OnLoginFocused(object sender, EventArgs e)
         { 
             lb_logging_er.IsVisible = false;
-            fr_login.BorderColor = Color.SpringGreen;
+            fr_login.BorderColor = Color.FromRgb(105,233,165);
         }
 
         private void OnPasswordFocused(object sender, EventArgs e)
         {
             if (lb_login_error.IsVisible)
             {
-                lay_registraion.Padding = new Thickness(0, 130, 0, 20);
+                bt_register.Margin = new Thickness(0, 180, 0, 20);
             }
             else
             {
-                lay_registraion.Padding = new Thickness(0, 150, 0, 15);
+                bt_register.Margin = new Thickness(0, 200, 0, 15);
             }
             lb_logging_er.IsVisible = false;
-            fr_pass.BorderColor = Color.SpringGreen;
+            fr_pass.BorderColor = Color.FromRgb(105,233,165);
         }
 
         private void OnPasswordUnFocused(object sender, EventArgs e)
@@ -404,7 +411,7 @@ namespace YoungDevelopers
 
         public async void ErrorAlert(string a)
         {
-            await DisplayAlert("Error", a, "OK");
+            await DisplayAlert("Ошибка", a, "OK");
         }
     }
 }

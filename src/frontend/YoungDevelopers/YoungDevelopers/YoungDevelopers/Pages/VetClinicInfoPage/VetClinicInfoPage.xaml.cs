@@ -1,5 +1,6 @@
-﻿
-using DogsCompanion.Api.Client;
+﻿using DogsCompanion.Api.Client;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -27,7 +28,7 @@ namespace YoungDevelopers
             VetClinicID = vetClinicID;
             vetClinic = DataControl.GetVetClinicItem(VetClinicID);
             AllDay = vetClinic.IsAllDay;
-            Title = "Информация о груминг-салоне";
+            Title = "Информация о ветклинике";
             layout = new StackLayout();
             layout.Orientation = StackOrientation.Vertical;
             layout.VerticalOptions = LayoutOptions.FillAndExpand;
@@ -40,7 +41,7 @@ namespace YoungDevelopers
 
                 Text = vetClinic.Name,
                 FontAttributes = FontAttributes.Bold,
-                BackgroundColor = Color.SpringGreen,
+                BackgroundColor = Color.FromRgb(105,233,165),
                 CornerRadius = 8,
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
@@ -99,14 +100,37 @@ namespace YoungDevelopers
                 TextColor = Color.Black,
                 FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(15, 0, 0, 0),
+                TextDecorations = TextDecorations.Underline,
             };
+
+            System.Windows.Input.ICommand command = new Command<string>((url) =>
+            {
+                try
+                {
+                    string formttedUrl = url;
+                    if (!url.StartsWith("http"))
+                    {
+                        formttedUrl = $"http://{url}";
+                    }
+                    Xamarin.Essentials.Launcher.OpenAsync(formttedUrl);
+                }
+                catch (Exception)
+                {
+                }
+            });
+
+            lb_site.GestureRecognizers.Add(new TapGestureRecognizer()
+            {
+                Command = command,
+                CommandParameter = vetClinic.Link
+            });
 
             layout.Children.Add(lb_site);
 
             lb_rating = new Label()
             {
                 HorizontalOptions = LayoutOptions.Start,
-                Text = "Рейтинг: " + vetClinic.Rating.ToString() + " ИЗ " + '5',
+                Text = "Рейтинг: " + (vetClinic.Rating == 0 ? "нет оценок" : $"{vetClinic.Rating} из 5"),
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.Black,
@@ -229,29 +253,31 @@ namespace YoungDevelopers
             UpdateFieldsFromServer();
         }
 
-        #region Обработка событий
-
-
-        #endregion
-
         public async void UpdateFieldsFromServer()
         {
-            vetClinic = (VetClinic)await dogsCompanionClient.GetVetClinicAsync(VetClinicID);
-            DataControl.SetVetclinicItem(vetClinic);
+            try
+            {
+                vetClinic = (VetClinic)await dogsCompanionClient.GetVetClinicAsync(VetClinicID);
+                DataControl.SetVetclinicItem(vetClinic);
 
-            bt_name.Text = vetClinic.Name;
-            lb_address.Text = "Адрес: " + vetClinic.Address;
-            lb_clockar.Text = "КРУГЛОСУТОЧНО " + DataControl.GetEmoji(vetClinic.IsAllDay);
-            lb_phone.Text = "Телефон: " + vetClinic.PhoneNumber;
-            lb_site.Text = "Сайт: " + vetClinic.Link;
-            lb_rating.Text = "Рейтинг: " + vetClinic.Rating.ToString() + " ИЗ " + '5';
-            lb_monday.Text = DataControl.GetHoursString(AllDay, "ПН", vetClinic.OpeningHours.First(s => s.Day == Day._1).Periods);
-            lb_tuesday.Text = DataControl.GetHoursString(AllDay, "ВТ", vetClinic.OpeningHours.First(s => s.Day == Day._2).Periods);
-            lb_wednesday.Text = DataControl.GetHoursString(AllDay, "СР", vetClinic.OpeningHours.First(s => s.Day == Day._3).Periods);
-            lb_thursday.Text = DataControl.GetHoursString(AllDay, "ЧТ", vetClinic.OpeningHours.First(s => s.Day == Day._4).Periods);
-            lb_friday.Text = DataControl.GetHoursString(AllDay, "ПТ", vetClinic.OpeningHours.First(s => s.Day == Day._5).Periods);
-            lb_saturday.Text = DataControl.GetHoursString(AllDay, "СБ", vetClinic.OpeningHours.First(s => s.Day == Day._6).Periods);
-            lb_sunday.Text = DataControl.GetHoursString(AllDay, "ВС", vetClinic.OpeningHours.First(s => s.Day == Day._7).Periods);
+                bt_name.Text = vetClinic.Name;
+                lb_address.Text = "Адрес: " + vetClinic.Address;
+                lb_clockar.Text = "КРУГЛОСУТОЧНО " + DataControl.GetEmoji(vetClinic.IsAllDay);
+                lb_phone.Text = "Телефон: " + vetClinic.PhoneNumber;
+                lb_site.Text = "Сайт: " + vetClinic.Link;
+                lb_rating.Text = "Рейтинг: " + (vetClinic.Rating == 0 ? "нет оценок" : $"{vetClinic.Rating} из 5");
+                lb_monday.Text = DataControl.GetHoursString(AllDay, "ПН", vetClinic.OpeningHours.First(s => s.Day == Day._1).Periods);
+                lb_tuesday.Text = DataControl.GetHoursString(AllDay, "ВТ", vetClinic.OpeningHours.First(s => s.Day == Day._2).Periods);
+                lb_wednesday.Text = DataControl.GetHoursString(AllDay, "СР", vetClinic.OpeningHours.First(s => s.Day == Day._3).Periods);
+                lb_thursday.Text = DataControl.GetHoursString(AllDay, "ЧТ", vetClinic.OpeningHours.First(s => s.Day == Day._4).Periods);
+                lb_friday.Text = DataControl.GetHoursString(AllDay, "ПТ", vetClinic.OpeningHours.First(s => s.Day == Day._5).Periods);
+                lb_saturday.Text = DataControl.GetHoursString(AllDay, "СБ", vetClinic.OpeningHours.First(s => s.Day == Day._6).Periods);
+                lb_sunday.Text = DataControl.GetHoursString(AllDay, "ВС", vetClinic.OpeningHours.First(s => s.Day == Day._7).Periods);
+            }
+            catch (Exception e)
+            {
+                await DisplayAlert("Ошибка", "Сервис недоступен", "OK");
+            }
         }
     }
 }
