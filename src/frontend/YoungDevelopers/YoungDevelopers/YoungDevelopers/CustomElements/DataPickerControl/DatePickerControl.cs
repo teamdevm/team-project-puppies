@@ -7,6 +7,9 @@ namespace YoungDevelopers
 {
     public class DatePickerControl : DatePicker
     {
-
+        public DatePickerControl()
+        {
+            this.MaximumDate = DateTime.Now.ToUniversalTime();
+        }
     }
 }
