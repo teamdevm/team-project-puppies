@@ -8,6 +8,7 @@ using System.Net.Http;
 using YoungDevelopers.Client;
 using System.Collections.Generic;
 using System.Linq;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -29,7 +30,7 @@ namespace YoungDevelopers
         private ControlEntry en_login, en_password;
         private Button bt_login, bt_register;
         private Frame fr_login, fr_pass;
-        private Regex re_email = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
+        private Regex re_email = new Regex(RegexConstants.Email);
         private SendAuth sendauth;
         private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
         private HttpClient httpClient = DataControl.httpClient;

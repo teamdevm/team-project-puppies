@@ -3,6 +3,7 @@ using System;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -18,7 +19,7 @@ namespace YoungDevelopers
         private ControlEntry en_password, en_rep_password, en_old_password;
         private DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
         private Regex
-            re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$");
+            re_password = new Regex(RegexConstants.Password);
         #endregion
         public EditPassPage()
         {
@@ -81,7 +82,7 @@ namespace YoungDevelopers
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Пароль должен содержать хотя бы одну цифру, латинскую букву в нижнем регистре, латинскую букву в верхнем регистре и спецсимвол [#?!@$%^&*-]",
+                Text = ErrorConstants.PasswordRequirements,
                 Margin = new Thickness(15, -5, 10, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,
@@ -137,7 +138,7 @@ namespace YoungDevelopers
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Пароль должен содержать хотя бы одну цифру, латинскую букву в нижнем регистре, латинскую букву в верхнем регистре и спецсимвол",
+                Text = ErrorConstants.PasswordRequirements,
                 Margin = new Thickness(15, -5, 10, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,

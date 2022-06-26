@@ -3,6 +3,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using System.Text.RegularExpressions;
 using DogsCompanion.Api.Client;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -33,9 +34,9 @@ namespace YoungDevelopers
         private CheckBox cb_approve;
         private SendRegistraion sendreg;
         private Regex 
-            re_lastname = new Regex(@"^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$"),
-            re_email = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$"), 
-            re_password = new Regex(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$");
+            re_lastname = new Regex(RegexConstants.LastName),
+            re_email = new Regex(RegexConstants.Email), 
+            re_password = new Regex(RegexConstants.Password);
 
         #endregion
         public RegistrationPage()
@@ -435,7 +436,7 @@ namespace YoungDevelopers
             {
                 IsVisible = false,
                 FontFamily = "Cascadia Code Light",
-                Text = "Пароль должен содержать хотя бы одну цифру, латинскую букву в нижнем регистре, латинскую букву в верхнем регистре и спецсимвол [#?!@$%^&*-]",
+                Text = ErrorConstants.PasswordRequirements,
                 Margin = new Thickness(15, -5, 10, -1),
                 VerticalOptions = LayoutOptions.Start,
                 TextColor = Color.Red,

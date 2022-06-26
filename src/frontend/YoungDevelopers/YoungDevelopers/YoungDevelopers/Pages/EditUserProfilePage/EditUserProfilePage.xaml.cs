@@ -4,6 +4,7 @@ using System;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -22,7 +23,7 @@ namespace YoungDevelopers
         private DatePickerControl dp_birthdate;
         DogsCompanionClient dogsCompanionClient = DataControl.dogsCompanionClient;
         private Regex
-            re_lastname = new Regex(@"^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$");
+            re_lastname = new Regex(RegexConstants.LastName);
 
         #endregion
 

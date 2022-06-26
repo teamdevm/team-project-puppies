@@ -6,6 +6,7 @@ using DogsCompanion.Api.Client;
 using System.Net.Http;
 using YoungDevelopers.Client;
 using Microsoft.AspNetCore.Http;
+using YoungDevelopers.Utils;
 
 namespace YoungDevelopers
 {
@@ -14,6 +15,7 @@ namespace YoungDevelopers
     public partial class DogAddPage : ContentPage
     {
         #region Инициализация 
+        private UpdateDog savedoge;
         private ActivityIndicator activityIndicator;
         private StackLayout main, layout;
         private ScrollView scrollview;
@@ -28,8 +30,8 @@ namespace YoungDevelopers
         private HttpClient httpClient = DataControl.httpClient;
         private TokenController tokenController = DataControl.tokenController;
         private Regex
-            re_nickname = new Regex(@"^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$"),
-            re_weight = new Regex("[+-]?([0-9]*[.])?[0-9]+");
+            re_nickname = new Regex(RegexConstants.DogName),
+            re_weight = new Regex(RegexConstants.Weight);
         #endregion
 
         public DogAddPage(SendRegistraion userInfo_input)
@@ -269,6 +271,8 @@ namespace YoungDevelopers
                 HasShadow = true,
             };
 
+            dp_birthdate.Unfocused += OnDateUnfocused;
+
             layout.Children.Add(fr_birthdate);
 
             activityIndicator = new ActivityIndicator
@@ -290,7 +294,7 @@ namespace YoungDevelopers
                 FontFamily = "Cascadia Code Light",
                 TextColor = Color.White,
                 HorizontalOptions = LayoutOptions.Center,
-                BackgroundColor = Color.FromRgb(105,233,165),
+                BackgroundColor = Color.FromRgb(105, 233, 165),
                 CornerRadius = 10,
                 WidthRequest = 370,
                 HeightRequest = 40,
@@ -328,12 +332,30 @@ namespace YoungDevelopers
 
             #endregion
 
+            InitializeComponent();
+
+            try
+            {
+                savedoge = new UpdateDog();
+                savedoge.Name = ((UpdateDog)App.Current.Properties["savedoge"]).Name;
+                savedoge.Breed = ((UpdateDog)App.Current.Properties["savedoge"]).Breed;
+                savedoge.Weight = ((UpdateDog)App.Current.Properties["savedoge"]).Weight;
+                savedoge.BirthDate = ((UpdateDog)App.Current.Properties["savedoge"]).BirthDate;
+                en_nickname.Text = savedoge.Name.ToString();
+                en_breed.Text = savedoge.Breed.ToString();
+                en_weight.Text = savedoge.Weight == -1 ? "" : savedoge.Weight.ToString();
+                dp_birthdate.Date = DateTime.Parse(savedoge.BirthDate.ToString());
+            }
+            catch (Exception ex)
+            {
+            }
+
             // Контент страницы
             scrollview.Content = layout;
             scrollview.VerticalOptions = LayoutOptions.FillAndExpand;
             main.Children.Add(scrollview);
             this.Content = main;
-            InitializeComponent();
+
         }
 
         #region Обработка событий
@@ -350,17 +372,12 @@ namespace YoungDevelopers
 
         }
 
-        private void OnUploadClicked(object sender, EventArgs e)
-        {
-
-        }
-
         private async void OnRegistrateClicked(object sender, EventArgs e)
         {
             lb_main_fields.IsVisible = false;
             if (dp_birthdate.Date.ToString("dd.MM.yyyy") == DateTime.Now.Date.ToString("dd.MM.yyyy") && en_nickname.Text == "" && en_breed.Text == "" && en_weight.Text == "")
             {
-                
+
                 return;
             }
             else
@@ -379,7 +396,7 @@ namespace YoungDevelopers
                     bt_registrate.IsVisible = false;
                     activityIndicator.IsVisible = true;
                     activityIndicator.IsRunning = true;
-                    
+
                     UpdateDog createDog = new UpdateDog();
                     createDog.Name = en_nickname.Text;
                     createDog.Breed = en_breed.Text;
@@ -414,14 +431,15 @@ namespace YoungDevelopers
                         // Сохранение токенов в хранилище
                         await tokenController.SetRefreshTokenAsync(response.RefreshToken);
                         await tokenController.SetAccessTokenAsync(response.AccessToken);
-                                             
-                        // Установить текущего пользователя АВАВАВА ОСУЖДАЮ
+
+                        // Установить текущего пользователя 
                         DataControl.SetNewCurrentUser(response);
 
                         bt_registrate.IsVisible = true;
                         activityIndicator.IsVisible = false;
                         activityIndicator.IsRunning = false;
 
+                        App.Current.Properties["savedoge"] = null;
 
                         App.Current.MainPage = new MainPage();
                     }
@@ -440,7 +458,6 @@ namespace YoungDevelopers
                             await DisplayAlert("Ошибка", "Номер телефона уже используется", "OK");
                         }
                         else if (apiExc.StatusCode == StatusCodes.Status503ServiceUnavailable)
-
                         {
                             lb_reg_er.Text = "Сервис недоступен";
                             lb_reg_er.IsVisible = true;
@@ -458,13 +475,13 @@ namespace YoungDevelopers
                         await DisplayAlert("Ошибка", ex.Message, "OK");
 
                     }
-                }             
+                }
             }
         }
 
         private void OnNicknameFocused(object sender, EventArgs e)
         {
-            fr_nickname.BorderColor = Color.FromRgb(105,233,165);
+            fr_nickname.BorderColor = Color.FromRgb(105, 233, 165);
         }
 
         private void OnNicknameUnfocused(object sender, EventArgs e)
@@ -492,6 +509,7 @@ namespace YoungDevelopers
                     CheckRecField();
                 }
             }
+            OnDisappearing();
         }
 
         private void OnNicknameTextChanged(object sender, EventArgs e)
@@ -505,7 +523,7 @@ namespace YoungDevelopers
 
         private void OnBreedFocused(object sender, EventArgs e)
         {
-            fr_breed.BorderColor = Color.FromRgb(105,233,165);
+            fr_breed.BorderColor = Color.FromRgb(105, 233, 165);
         }
 
         private void OnBreedUnfocused(object sender, EventArgs e)
@@ -532,6 +550,7 @@ namespace YoungDevelopers
                     CheckRecField();
                 }
             }
+            OnDisappearing();
         }
 
         private void OnBreedTextChanged(object sender, EventArgs e)
@@ -545,7 +564,7 @@ namespace YoungDevelopers
 
         private void OnWeightFocused(object sender, EventArgs e)
         {
-            fr_weight.BorderColor = Color.FromRgb(105,233,165);
+            fr_weight.BorderColor = Color.FromRgb(105, 233, 165);
         }
 
         private void OnWeightUnfocused(object sender, EventArgs e)
@@ -572,6 +591,12 @@ namespace YoungDevelopers
                     CheckRecField();
                 }
             }
+            OnDisappearing();
+        }
+
+        private void OnDateUnfocused(object sender, EventArgs e)
+        {
+            OnDisappearing();
         }
 
         private void OnWeightTextChanged(object sender, EventArgs e)
@@ -583,6 +608,56 @@ namespace YoungDevelopers
             en_weight.TextColor = Color.Black;
         }
 
+        public void OnDisappearing()
+        {
+            try
+            {
+                savedoge = new UpdateDog();
+
+                if (fr_nickname.BorderColor != Color.FromRgb(194, 85, 85))
+                {
+                    savedoge.Name = en_nickname.Text;
+                }
+                else
+                {
+                    savedoge.Name = "";
+                }
+
+                if (fr_breed.BorderColor != Color.FromRgb(194, 85, 85))
+                {
+                    savedoge.Breed = en_breed.Text;
+                }
+                else
+                {
+                    savedoge.Breed = "";
+                }
+
+                if (fr_weight.BorderColor != Color.FromRgb(194, 85, 85))
+                {
+                    savedoge.Weight = en_weight.Text == "" ? -1 : int.Parse(en_weight.Text);
+                }
+                else
+                {
+                    savedoge.Weight = null;
+                }
+
+                savedoge.BirthDate = new DateTimeOffset(dp_birthdate.Date);
+
+                App.Current.Properties["savedoge"] = new UpdateDog();
+                ((UpdateDog)App.Current.Properties["savedoge"]).Name = savedoge.Name;
+                ((UpdateDog)App.Current.Properties["savedoge"]).Breed = savedoge.Breed;
+                ((UpdateDog)App.Current.Properties["savedoge"]).Weight = savedoge.Weight;
+                ((UpdateDog)App.Current.Properties["savedoge"]).BirthDate = savedoge.BirthDate;
+            }
+            catch (Exception e)
+            {
+            }
+        }
+
+        public async void Msg(Exception e)
+        {
+            await DisplayAlert("Ошибка", e.Message, "OK");
+        }
         #endregion
     }
 }
